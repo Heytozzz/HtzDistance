@@ -1,5 +1,6 @@
 package com.heytozzz.htzdistance.render;
 
+import com.heytozzz.htzdistance.GhostStats;
 import com.heytozzz.htzdistance.HtzDistanceClient;
 import com.heytozzz.htzdistance.config.ConfigManager;
 import com.heytozzz.htzdistance.config.HtzConfig;
@@ -59,6 +60,8 @@ public final class GhostRenderer {
         GhostStore store = GhostManager.get().store();
         HtzConfig config = ConfigManager.get();
         if (level == null || store == null || store.size() == 0 || !config.enabled) {
+            // Nothing to draw: stop the culling worker from tracing a stale ghost list.
+            CullingWorker.get().clear();
             return result;
         }
 
@@ -95,6 +98,7 @@ public final class GhostRenderer {
     /** Immediate-mode rendering (1.21.8). */
     public static void render(Camera camera, Frustum frustum, MultiBufferSource buffers, float partialTick) {
         lastFrameRendered = 0;
+        long startNanos = System.nanoTime();
         List<Entity> entities = visibleGhostEntities(camera, frustum, partialTick);
         if (entities.isEmpty()) {
             return;
@@ -122,6 +126,8 @@ public final class GhostRenderer {
             GhostStyleScope.end();
         }
         lastFrameRendered = rendered;
+        GhostStats.RENDER_NANOS.addAndGet(System.nanoTime() - startNanos);
+        GhostStats.RENDER_FRAMES.incrementAndGet();
     }
     //?}
 
@@ -132,6 +138,7 @@ public final class GhostRenderer {
      ^/
     public static void extract(Camera camera, Frustum frustum, float partialTick, LevelRenderState levelState) {
         lastFrameRendered = 0;
+        long startNanos = System.nanoTime();
         List<Entity> entities = visibleGhostEntities(camera, frustum, partialTick);
         if (entities.isEmpty()) {
             return;
@@ -155,6 +162,8 @@ public final class GhostRenderer {
             }
         }
         lastFrameRendered = rendered;
+        GhostStats.RENDER_NANOS.addAndGet(System.nanoTime() - startNanos);
+        GhostStats.RENDER_FRAMES.incrementAndGet();
     }
     *///?}
 

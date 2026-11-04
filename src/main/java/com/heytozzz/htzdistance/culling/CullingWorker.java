@@ -1,5 +1,6 @@
 package com.heytozzz.htzdistance.culling;
 
+import com.heytozzz.htzdistance.GhostStats;
 import com.heytozzz.htzdistance.HtzDistanceClient;
 import com.heytozzz.htzdistance.capture.GhostSnapshot;
 import com.heytozzz.htzdistance.config.ConfigManager;
@@ -121,6 +122,7 @@ public final class CullingWorker {
             return;
         }
 
+        long startNanos = System.nanoTime();
         provider.setLevel(currentLevel);
         culling.resetCache();
         viewer.set(camera.x, camera.y, camera.z);
@@ -129,6 +131,8 @@ public final class CullingWorker {
             ghost.setVisible(culling.isAABBVisible(aabbMin, aabbMax, viewer));
         }
         provider.cleanup();
+        GhostStats.CULLING_NANOS.addAndGet(System.nanoTime() - startNanos);
+        GhostStats.CULLING_PASSES.incrementAndGet();
     }
 
     /** Conservative bounding box per kind (slightly larger than the real one). */

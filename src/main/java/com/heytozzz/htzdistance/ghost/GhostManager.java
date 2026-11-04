@@ -1,5 +1,6 @@
 package com.heytozzz.htzdistance.ghost;
 
+import com.heytozzz.htzdistance.GhostStats;
 import com.heytozzz.htzdistance.HtzDistanceClient;
 import com.heytozzz.htzdistance.capture.GhostSnapshot;
 import com.heytozzz.htzdistance.capture.RangeClassifier;
@@ -82,6 +83,8 @@ public final class GhostManager {
             return;
         }
 
+        long startNanos = System.nanoTime();
+        int captured = 0;
         boolean added = false;
         for (int i = 0; i < entityIds.size(); i++) {
             Entity entity = level.getEntity(entityIds.getInt(i));
@@ -112,9 +115,14 @@ public final class GhostManager {
             }
             current.add(snapshot, config.reconcileRadius);
             added = true;
+            captured++;
             HtzDistanceClient.debug("Captured {} at {} (distance {})", kind, entity.blockPosition(), fmt(distance));
         }
 
+        if (captured > 0) {
+            GhostStats.CAPTURE_NANOS.addAndGet(System.nanoTime() - startNanos);
+            GhostStats.CAPTURES.addAndGet(captured);
+        }
         if (added) {
             int dropped = current.enforceLimit(config.maxGhosts, player.getX(), player.getY(), player.getZ());
             if (dropped > 0) {
