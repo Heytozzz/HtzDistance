@@ -1,5 +1,6 @@
 package com.heytozzz.htzdistance;
 
+import com.heytozzz.htzdistance.config.ConfigManager;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public final class HtzDistanceClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ConfigManager.load();
         LOGGER.info("HtzDistance {} initialized for Minecraft {}", VERSION, MINECRAFT);
     }
 }
