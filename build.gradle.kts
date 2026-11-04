@@ -42,11 +42,23 @@ loom {
         options.put("mark-corresponding-synthetics", "1")
     }
 
-    runConfigs.all {
+    // Only the manual dev runs share ./run; the client game test keeps its own (cleared) directory.
+    runConfigs.matching { it.name == "client" || it.name == "server" }.configureEach {
         preferGradleTask = true
         generateRunConfig = true
         runDirectory = rootProject.file("run")
         jvmArguments.add("-Dmixin.debug.export=true")
+    }
+}
+
+// Automated in-game tests (src/gametest): singleplayer worlds driven by Fabric's client game test API.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "htzdistance-gametest"
+        enableGameTests = false
+        enableClientGameTests = true
+        eula = false
     }
 }
 
