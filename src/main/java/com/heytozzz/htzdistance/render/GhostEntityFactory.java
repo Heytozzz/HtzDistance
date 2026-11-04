@@ -50,6 +50,7 @@ public final class GhostEntityFactory {
             case GLOW_ITEM_FRAME -> EntityType.GLOW_ITEM_FRAME;
         };
         try {
+            GhostMapSupport.ensureMapData(level, snapshot.map());
             Entity entity = type.create(level, EntitySpawnReason.LOAD);
             if (entity == null) {
                 return null;
