@@ -9,6 +9,9 @@
       "com.heytozzz.htzdistance.test.GhostLifecycleClientTest"
     ]
   },
+  "mixins": [
+    "htzdistance-gametest.mixins.json"
+  ],
   "depends": {
     "htzdistance": "*"
   }
