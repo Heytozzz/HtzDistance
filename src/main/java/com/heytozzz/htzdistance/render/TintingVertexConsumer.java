@@ -6,11 +6,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
  * Multiplies every vertex color by the ghost style color. Only the primitive methods are
  * overridden, so the bulk default methods (models, quads) route through {@link #setColor}.
  */
-final class TintingVertexConsumer implements VertexConsumer {
+public final class TintingVertexConsumer implements VertexConsumer {
     private final VertexConsumer delegate;
     private final GhostStyleColor color;
 
-    TintingVertexConsumer(VertexConsumer delegate, GhostStyleColor color) {
+    public TintingVertexConsumer(VertexConsumer delegate, GhostStyleColor color) {
         this.delegate = delegate;
         this.color = color;
     }
@@ -26,6 +26,31 @@ final class TintingVertexConsumer implements VertexConsumer {
         delegate.setColor(color.applyRed(red), color.applyGreen(green), color.applyBlue(blue), color.applyAlpha(alpha));
         return this;
     }
+
+    //? if >=1.21.11 {
+    /*@Override
+    public VertexConsumer setColor(int argb) {
+        int alpha = argb >>> 24;
+        int red = (argb >> 16) & 0xFF;
+        int green = (argb >> 8) & 0xFF;
+        int blue = argb & 0xFF;
+        return setColor(red, green, blue, alpha);
+    }
+
+    @Override
+    public VertexConsumer setLineWidth(float width) {
+        delegate.setLineWidth(width);
+        return this;
+    }
+    *///?}
+
+    //? if >=26.3 {
+    /*@Override
+    public VertexConsumer setUv3(float u, float v) {
+        delegate.setUv3(u, v);
+        return this;
+    }
+    *///?}
 
     @Override
     public VertexConsumer setUv(float u, float v) {

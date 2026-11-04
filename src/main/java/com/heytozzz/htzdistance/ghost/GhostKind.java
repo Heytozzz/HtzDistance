@@ -1,5 +1,10 @@
 package com.heytozzz.htzdistance.ghost;
 
+import net.minecraft.world.entity.EntityType;
+//? if >=26.2 {
+/*import net.minecraft.world.entity.EntityTypes;
+*///?}
+
 /**
  * Entity kinds that can be kept as ghosts.
  *
@@ -27,6 +32,21 @@ public enum GhostKind {
     /** Default horizontal distance (blocks) at which the server stops tracking this kind. */
     public double defaultThreshold() {
         return defaultThreshold;
+    }
+
+    /** Vanilla entity type of this kind. */
+    public EntityType<?> entityType() {
+        return switch (this) {
+            //? if >=26.2 {
+            /*case ARMOR_STAND -> EntityTypes.ARMOR_STAND;
+            case ITEM_FRAME -> EntityTypes.ITEM_FRAME;
+            case GLOW_ITEM_FRAME -> EntityTypes.GLOW_ITEM_FRAME;
+            *///?} else {
+            case ARMOR_STAND -> EntityType.ARMOR_STAND;
+            case ITEM_FRAME -> EntityType.ITEM_FRAME;
+            case GLOW_ITEM_FRAME -> EntityType.GLOW_ITEM_FRAME;
+            //?}
+        };
     }
 
     public static GhostKind byConfigKey(String key) {

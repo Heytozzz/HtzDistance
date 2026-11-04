@@ -19,9 +19,8 @@ plugins {
 
 stonecutter {
     create(rootProject) {
-        // 1.21.8 first (end-to-end). The remaining targets are added in the multiversion step:
-        // "1.21.10", "1.21.11", "26.1.2", "26.2", "26.3".
-        versions("1.21.8")
+        // 1.21.9 is skipped on purpose: its Fabric API has no world render event.
+        versions("1.21.8", "1.21.10", "1.21.11", "26.1.2", "26.2", "26.3")
         vcsVersion = "1.21.8"
     }
 }

@@ -32,14 +32,10 @@ public final class SnapshotFactory {
     @Nullable
     public static GhostKind kindOf(EntityType<?> type) {
         // Compare types, not classes: GlowItemFrame extends ItemFrame.
-        if (type == EntityType.ARMOR_STAND) {
-            return GhostKind.ARMOR_STAND;
-        }
-        if (type == EntityType.ITEM_FRAME) {
-            return GhostKind.ITEM_FRAME;
-        }
-        if (type == EntityType.GLOW_ITEM_FRAME) {
-            return GhostKind.GLOW_ITEM_FRAME;
+        for (GhostKind kind : GhostKind.values()) {
+            if (kind.entityType() == type) {
+                return kind;
+            }
         }
         return null;
     }

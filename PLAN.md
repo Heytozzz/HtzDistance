@@ -190,9 +190,15 @@ Key rules:
       addition distances while approaching; teleports filtered; config/htzdistance-learned.json)
 
 ### Step 11 — Multiversion
-- [ ] 1.21.10 / 1.21.11 (new `world.WorldRenderEvents`, submit renderer)
-- [ ] 26.1.x / 26.2 / 26.3 (non-remap Loom, `level.LevelRenderEvents`, Java 25)
-- [ ] `chiseledBuild` produces all jars; smoke test each in a dev client
+- [x] All six nodes compile from one source tree (Stonecutter conditionals + replacements:
+      `Util`/`ResourceLocation`->`Identifier` from 1.21.11, `EntityTypes` from 26.2,
+      `ChunkPos` record from 26.1, packet record accessor on 26.3, new `VertexConsumer` methods)
+- [x] Rendering from 1.21.10: ghost render states are added to the frame's entity list in the
+      extraction event (`world.WorldRenderEvents` 1.21.10-1.21.11, `level.LevelRenderEvents` 26.x);
+      tint/translucent styles become a glowing outline in the tint color there
+- [x] Mixin list generated per version (1.21.8-only buffer-source styling and accessors)
+- [x] Client game tests pass on every version (1.21.8, 1.21.10, 1.21.11, 26.1.2, 26.2, 26.3)
 
 ### Step 12 — Polish
-- [ ] README (features, config, compatibility notes with EntityCulling), CI optional
+- [x] README (features, config, compatibility notes with EntityCulling)
+- [ ] CI (optional)

@@ -1,12 +1,12 @@
 package com.heytozzz.htzdistance.render;
 
+// Only used up to 1.21.8 (immediate rendering); later versions use render states.
+//? if <1.21.10 {
 import com.heytozzz.htzdistance.mixin.render.CompositeRenderTypeAccessor;
 import com.heytozzz.htzdistance.mixin.render.CompositeStateAccessor;
 import com.heytozzz.htzdistance.mixin.render.EmptyTextureStateShardInvoker;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,30 +15,19 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Buffer source used for ghosts (immediate rendering, up to 1.21.8). Applies the ghost style:
- * tints vertex colors and, for the translucent style, swaps opaque entity render types for
- * translucent ones with the same texture.
+ * Maps opaque entity render types to translucent ones with the same texture, for the
+ * translucent ghost style.
  */
-final class GhostBufferSource implements MultiBufferSource {
+public final class GhostRenderTypes {
     /** Opaque render type -> translucent equivalent (or itself when there is none). */
     private static final Map<RenderType, RenderType> TRANSLUCENT_CACHE = new IdentityHashMap<>();
 
-    private final MultiBufferSource delegate;
-    private final GhostStyleColor color;
-
-    GhostBufferSource(MultiBufferSource delegate, GhostStyleColor color) {
-        this.delegate = delegate;
-        this.color = color;
+    private GhostRenderTypes() {
     }
 
-    @Override
-    public VertexConsumer getBuffer(RenderType renderType) {
-        RenderType type = color.translucent() ? translucentFor(renderType) : renderType;
-        return new TintingVertexConsumer(delegate.getBuffer(type), color);
-    }
-
-    private static RenderType translucentFor(RenderType type) {
-        return TRANSLUCENT_CACHE.computeIfAbsent(type, GhostBufferSource::computeTranslucent);
+    /** Render thread only. */
+    public static RenderType translucentFor(RenderType type) {
+        return TRANSLUCENT_CACHE.computeIfAbsent(type, GhostRenderTypes::computeTranslucent);
     }
 
     private static RenderType computeTranslucent(RenderType type) {
@@ -60,3 +49,4 @@ final class GhostBufferSource implements MultiBufferSource {
         return RenderType.entityTranslucent(texture.get());
     }
 }
+//?}

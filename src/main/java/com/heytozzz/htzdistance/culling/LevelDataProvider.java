@@ -23,7 +23,11 @@ final class LevelDataProvider implements DataProvider {
 
     @Override
     public boolean prepareChunk(int chunkX, int chunkZ) {
+        //? if >=26.1 {
+        /*if (chunk != null && chunk.getPos().x() == chunkX && chunk.getPos().z() == chunkZ) {
+        *///?} else {
         if (chunk != null && chunk.getPos().x == chunkX && chunk.getPos().z == chunkZ) {
+        //?}
             return true;
         }
         chunk = level == null ? null : level.getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);

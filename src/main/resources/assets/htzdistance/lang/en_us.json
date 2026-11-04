@@ -33,7 +33,7 @@
   "htzdistance.config.occlusionCulling": "Occlusion culling",
   "htzdistance.config.occlusionCulling.description": "Skip ghosts hidden behind blocks, checked asynchronously on a background thread.",
   "htzdistance.config.ghostStyle": "Ghost style",
-  "htzdistance.config.ghostStyle.description": "How ghosts look compared to real entities.",
+  "htzdistance.config.ghostStyle.description": "How ghosts look compared to real entities. On Minecraft 1.21.10 and later, Tinted and Translucent show ghosts with a glowing outline in the tint color.",
   "htzdistance.config.ghostStyle.normal": "Normal",
   "htzdistance.config.ghostStyle.tint": "Tinted",
   "htzdistance.config.ghostStyle.translucent": "Translucent",

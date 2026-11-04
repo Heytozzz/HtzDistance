@@ -25,6 +25,10 @@ public abstract class ClientPacketListenerMixin {
             )
     )
     private void htzdistance$beforeRemoveEntities(ClientboundRemoveEntitiesPacket packet, CallbackInfo ci) {
+        //? if >=26.3 {
+        /*GhostManager.get().onRemoveEntities(packet.entityIds());
+        *///?} else {
         GhostManager.get().onRemoveEntities(packet.getEntityIds());
+        //?}
     }
 }

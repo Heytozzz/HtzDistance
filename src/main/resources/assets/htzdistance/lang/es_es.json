@@ -33,7 +33,7 @@
   "htzdistance.config.occlusionCulling": "Occlusion culling",
   "htzdistance.config.occlusionCulling.description": "No dibuja los fantasmas tapados por bloques; se comprueba en un hilo aparte.",
   "htzdistance.config.ghostStyle": "Estilo de los fantasmas",
-  "htzdistance.config.ghostStyle.description": "Cómo se ven los fantasmas respecto a las entidades reales.",
+  "htzdistance.config.ghostStyle.description": "Cómo se ven los fantasmas respecto a las entidades reales. En Minecraft 1.21.10 y posteriores, Con tinte y Translúcido muestran los fantasmas con un contorno brillante del color del tinte.",
   "htzdistance.config.ghostStyle.normal": "Normal",
   "htzdistance.config.ghostStyle.tint": "Con tinte",
   "htzdistance.config.ghostStyle.translucent": "Translúcido",

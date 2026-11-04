@@ -106,7 +106,19 @@ tasks {
         filesMatching("fabric.mod.json") { expand(props) }
 
         val mixinJava = "JAVA_${requiredJava.majorVersion}"
-        filesMatching("*.mixins.json") { expand("java" to mixinJava) }
+        // Client mixins differ per version: the buffer-source styling and render type accessors
+        // only exist for the immediate renderer (up to 1.21.8).
+        val clientMixins = buildList {
+            add("ClientPacketListenerMixin")
+            if (sc.current.parsed < "1.21.10") {
+                add("render.BufferSourceMixin")
+                add("render.CompositeRenderTypeAccessor")
+                add("render.CompositeStateAccessor")
+                add("render.EmptyTextureStateShardInvoker")
+            }
+        }.joinToString(",\n    ") { "\"$it\"" }
+        inputs.property("client_mixins", clientMixins)
+        filesMatching("htzdistance.mixins.json") { expand("java" to mixinJava, "client_mixins" to clientMixins) }
     }
 
     // Ship the license inside the jar.

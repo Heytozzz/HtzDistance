@@ -10,4 +10,13 @@ stonecutter active "1.21.8"
 stonecutter parameters {
     swaps["mod_version"] = "\"${property("mod.version")}\";"
     swaps["minecraft"] = "\"${node.metadata.version}\";"
+
+    // Plain renames, applied to the whole source tree.
+    replacements {
+        string(current.parsed >= "1.21.11") {
+            replace("import net.minecraft.Util;", "import net.minecraft.util.Util;")
+            replace("ResourceLocation", "Identifier")
+            replace("dimension().location()", "dimension().identifier()")
+        }
+    }
 }
