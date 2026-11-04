@@ -24,6 +24,15 @@ public final class Ghost {
     /** Written by the culling worker, read by the renderer. */
     private volatile boolean visible = true;
 
+    /**
+     * Render state extracted from {@link #renderEntity} and reused across frames (1.21.10+).
+     * Typed as Object because the render state classes differ between versions.
+     */
+    @Nullable
+    private Object cachedRenderState;
+    /** {@link System#nanoTime()} after which {@link #cachedRenderState} must be refreshed. */
+    private long cachedRenderStateExpiry;
+
     public Ghost(GhostSnapshot snapshot) {
         this.snapshot = snapshot;
     }
@@ -48,17 +57,31 @@ public final class Ghost {
     public void setRenderEntity(@Nullable Entity entity) {
         this.renderEntity = entity;
         this.renderEntityFailed = false;
+        this.cachedRenderState = null;
     }
 
     public void markRenderEntityFailed() {
         this.renderEntity = null;
         this.renderEntityFailed = true;
+        this.cachedRenderState = null;
     }
 
     /** Drops the render entity so it is rebuilt against the current level. */
     public void invalidateRenderEntity() {
         this.renderEntity = null;
         this.renderEntityFailed = false;
+        this.cachedRenderState = null;
+    }
+
+    /** Cached render state if it has not expired at {@code nowNanos}, otherwise {@code null}. */
+    @Nullable
+    public Object cachedRenderState(long nowNanos) {
+        return cachedRenderState != null && nowNanos - cachedRenderStateExpiry < 0 ? cachedRenderState : null;
+    }
+
+    public void setCachedRenderState(Object state, long expiryNanos) {
+        this.cachedRenderState = state;
+        this.cachedRenderStateExpiry = expiryNanos;
     }
 
     public long inRangeSince() {

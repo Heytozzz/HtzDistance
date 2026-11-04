@@ -40,6 +40,8 @@ import java.util.List;
  */
 public final class GhostRenderer {
     private static int lastFrameRendered;
+    /** Minimum age (1 s) before a cached ghost render state is extracted again. */
+    private static final long STATE_REFRESH_NANOS = 1_000_000_000L;
 
     private GhostRenderer() {
     }
@@ -53,8 +55,8 @@ public final class GhostRenderer {
      * Ghost entities to draw this frame: enabled, inside the max distance, not occluded and in
      * view. Also publishes the frame state to the culling worker. Render thread only.
      */
-    private static List<Entity> visibleGhostEntities(Camera camera, Frustum frustum, float partialTick) {
-        List<Entity> result = new ArrayList<>();
+    private static List<Ghost> visibleGhosts(Camera camera, Frustum frustum, float partialTick) {
+        List<Ghost> result = new ArrayList<>();
         Minecraft minecraft = Minecraft.getInstance();
         ClientLevel level = minecraft.level;
         GhostStore store = GhostManager.get().store();
@@ -78,7 +80,7 @@ public final class GhostRenderer {
             }
             Entity entity = GhostEntityFactory.getOrCreate(ghost, level);
             if (entity != null && inView(dispatcher, entity, frustum, cam, partialTick)) {
-                result.add(entity);
+                result.add(ghost);
             }
         }
         return result;
@@ -99,8 +101,8 @@ public final class GhostRenderer {
     public static void render(Camera camera, Frustum frustum, MultiBufferSource buffers, float partialTick) {
         lastFrameRendered = 0;
         long startNanos = System.nanoTime();
-        List<Entity> entities = visibleGhostEntities(camera, frustum, partialTick);
-        if (entities.isEmpty()) {
+        List<Ghost> ghosts = visibleGhosts(camera, frustum, partialTick);
+        if (ghosts.isEmpty()) {
             return;
         }
         Vec3 cam = camera.position();
@@ -109,7 +111,8 @@ public final class GhostRenderer {
         int rendered = 0;
         GhostStyleScope.begin(GhostStyleColor.from(ConfigManager.get()));
         try {
-            for (Entity entity : entities) {
+            for (Ghost ghost : ghosts) {
+                Entity entity = ghost.renderEntity();
                 try {
                     int light = dispatcher.getPackedLightCoords(entity, partialTick);
                     dispatcher.render(entity,
@@ -139,19 +142,28 @@ public final class GhostRenderer {
     public static void extract(Camera camera, Frustum frustum, float partialTick, LevelRenderState levelState) {
         lastFrameRendered = 0;
         long startNanos = System.nanoTime();
-        List<Entity> entities = visibleGhostEntities(camera, frustum, partialTick);
-        if (entities.isEmpty()) {
+        List<Ghost> ghosts = visibleGhosts(camera, frustum, partialTick);
+        if (ghosts.isEmpty()) {
             return;
         }
         HtzConfig config = ConfigManager.get();
         int outline = config.ghostStyle == HtzConfig.GhostStyle.NORMAL ? 0 : 0xFF000000 | config.tintColor;
         EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        long now = System.nanoTime();
         int rendered = 0;
-        for (Entity entity : entities) {
+        for (Ghost ghost : ghosts) {
+            Entity entity = ghost.renderEntity();
             try {
-                EntityRenderState state = dispatcher.extractEntity(entity, partialTick);
+                // Ghosts never move or animate, so their render state is reused across frames and
+                // only re-extracted about once per second (staggered per ghost to avoid spikes),
+                // which keeps light and camera distance fresh enough.
+                EntityRenderState state = (EntityRenderState) ghost.cachedRenderState(now);
+                if (state == null) {
+                    state = dispatcher.extractEntity(entity, partialTick);
+                    ghost.setCachedRenderState(state, now + STATE_REFRESH_NANOS + (System.identityHashCode(ghost) & 0x1FFFFFFFL) % STATE_REFRESH_NANOS);
+                }
+                state.outlineColor = outline;
                 if (outline != 0) {
-                    state.outlineColor = outline;
                     GlowCompat.markGlowing(levelState);
                 }
                 levelState.entityRenderStates.add(state);
