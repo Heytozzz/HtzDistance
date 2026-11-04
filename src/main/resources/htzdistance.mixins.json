@@ -4,7 +4,10 @@
   "package": "com.heytozzz.htzdistance.mixin",
   "compatibilityLevel": "${java}",
   "client": [
-    "ClientPacketListenerMixin"
+    "ClientPacketListenerMixin",
+    "render.CompositeRenderTypeAccessor",
+    "render.CompositeStateAccessor",
+    "render.EmptyTextureStateShardInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
