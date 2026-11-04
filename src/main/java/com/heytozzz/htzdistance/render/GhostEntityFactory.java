@@ -67,11 +67,19 @@ public final class GhostEntityFactory {
             // Renderers read the entity id (26.2+ throws when it is unset). Server ids are
             // positive, so negative ids can never collide; the ghost is never registered anyway.
             entity.setId(nextGhostId());
-            // No interpolation from a previous position/rotation: the ghost is static.
+            // The ghost is static: current and previous rotation are both the captured one.
+            float yaw = snapshot.yRot();
+            entity.setYRot(yaw);
+            entity.setXRot(snapshot.xRot());
             entity.setOldPosAndRot();
             if (entity instanceof LivingEntity living) {
-                living.yBodyRotO = living.yBodyRot;
-                living.yHeadRotO = living.yHeadRot;
+                // The renderer draws the body yaw. ArmorStand#setYBodyRot (called by load) only
+                // sets the previous-tick values and leaves yBodyRot at 0 (south) until the entity
+                // ticks, which a ghost never does, so set every body/head yaw explicitly.
+                living.yBodyRot = yaw;
+                living.yBodyRotO = yaw;
+                living.yHeadRot = yaw;
+                living.yHeadRotO = yaw;
             }
             return entity;
         } catch (RuntimeException e) {
