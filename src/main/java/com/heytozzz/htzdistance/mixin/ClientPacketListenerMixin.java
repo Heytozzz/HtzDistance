@@ -10,6 +10,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin {
+    /*
+     * Full descriptor of PacketUtils#ensureRunningOnSameThread for this version. It must be
+     * complete: without a descriptor Loom cannot remap the target to intermediary names and the
+     * injection fails on obfuscated versions outside the dev environment.
+     */
+    //? if >=1.21.10 {
+    /*private static final String ENSURE_SAME_THREAD = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread("
+            + "Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V";
+    *///?} else {
+    private static final String ENSURE_SAME_THREAD = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread("
+            + "Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V";
+    //?}
 
     /**
      * Runs right after the packet was moved to the client thread and before any entity is
@@ -19,8 +31,7 @@ public abstract class ClientPacketListenerMixin {
             method = "handleRemoveEntities",
             at = @At(
                     value = "INVOKE",
-                    // No descriptor on purpose: the third parameter type changes between versions.
-                    target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread",
+                    target = ENSURE_SAME_THREAD,
                     shift = At.Shift.AFTER
             )
     )
