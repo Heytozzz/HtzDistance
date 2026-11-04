@@ -48,9 +48,11 @@ entity comes back into range.
   `repo.codemc.io/repository/maven-snapshots/`.
 - We write **our own** `DataProvider` (block opacity lookup on the client level), our own
   worker thread and our own scheduling — no EntityCulling code.
-- No conflict with EntityCulling: their copy is relocated, our ghosts never enter the level,
-  and we'll **relocate our copy too** (`com.heytozzz.htzdistance.shadow.occlusionculling`)
-  so a third mod bundling a different version can never clash.
+- No conflict with EntityCulling: their copy is relocated into their own package and our
+  ghosts never enter the level. We bundle the library with Fabric **jar-in-jar** (`include`),
+  pinned to the exact snapshot build `0.0.8-20240302.230836-1` (the same version EntityCulling
+  uses). If another mod bundles it un-relocated, Fabric Loader keeps a single copy; the API is
+  tiny and stable.
 
 ### 1.4 Config library
 
@@ -170,8 +172,8 @@ Key rules:
 - [ ] Capture map colors at removal; restore into client map data when missing
 
 ### Step 7 — Occlusion culling
-- [ ] Add + relocate OcclusionCulling (MIT notice kept in jar)
-- [ ] `LevelDataProvider`, `CullingWorker` thread, visible-set publication, toggle
+- [x] Add OcclusionCulling via jar-in-jar (MIT license ships inside its jar)
+- [x] `LevelDataProvider`, `CullingWorker` thread, visible-set publication, toggle
 
 ### Step 8 — Config screen
 - [ ] YACL screen with all options + Mod Menu entry, English lang file (+ Spanish)

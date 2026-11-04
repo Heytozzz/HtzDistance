@@ -19,6 +19,7 @@ repositories {
         filter { groups.forEach(::includeGroup) }
     }
     strictMaven("https://maven.terraformersmc.com/releases", "TerraformersMC", "com.terraformersmc")
+    strictMaven("https://repo.codemc.io/repository/maven-snapshots", "CodeMC", "com.logisticscraft")
 }
 
 dependencies {
@@ -29,6 +30,12 @@ dependencies {
     // Use mod* configurations even on 26.1+; loom-back-compat converts them.
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${sc.properties.get<String>("deps.fabric_api")}")
+
+    // Occlusion culling library (MIT), bundled in the jar via jar-in-jar.
+    // Pinned to an exact snapshot build for reproducible builds.
+    val occlusionCulling = "com.logisticscraft:occlusionculling:${property("deps.occlusionculling")}"
+    implementation(occlusionCulling)
+    include(occlusionCulling)
 
     // Mod Menu is optional at runtime: compiled against for the config button, present in dev runs.
     modCompileOnly("com.terraformersmc:modmenu:${sc.properties.get<String>("deps.modmenu")}")

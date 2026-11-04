@@ -2,6 +2,7 @@ package com.heytozzz.htzdistance.render;
 
 import com.heytozzz.htzdistance.HtzDistanceClient;
 import com.heytozzz.htzdistance.config.ConfigManager;
+import com.heytozzz.htzdistance.culling.CullingWorker;
 import com.heytozzz.htzdistance.config.HtzConfig;
 import com.heytozzz.htzdistance.ghost.Ghost;
 import com.heytozzz.htzdistance.ghost.GhostManager;
@@ -42,6 +43,7 @@ public final class GhostRenderer {
         }
 
         Vec3 cam = camera.getPosition();
+        CullingWorker.get().publish(level, cam, store);
         double maxDistanceSqr = config.maxRenderDistance * config.maxRenderDistance;
         EntityRenderDispatcher dispatcher = minecraft.getEntityRenderDispatcher();
         GhostStyleColor color = GhostStyleColor.from(config);

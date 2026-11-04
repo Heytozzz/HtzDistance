@@ -5,6 +5,8 @@ mod.group = "com.heytozzz.htzdistance"
 mod.version = "0.1.0"
 
 deps.fabric_loader = "0.19.5"
+# Same library EntityCulling uses (MIT): https://github.com/LogisticsCraft/OcclusionCulling
+deps.occlusionculling = "0.0.8-20240302.230836-1"
 
 ["1.21.8"]
 # Minecraft range written into fabric.mod.json
