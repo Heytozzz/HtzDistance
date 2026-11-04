@@ -94,6 +94,16 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-04-ghosts-translucent");
             updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.NORMAL);
+
+            // Occlusion culling: a wall between the player and the ghosts hides them.
+            String wall = String.format(Locale.ROOT, "fill %d %d %d %d %d %d", x - 8, y, z - 6, x + 8, y + 5, z - 6);
+            server.runCommand(wall + " stone");
+            context.waitTicks(10);
+            check(context.computeOnClient(client -> GhostRenderer.lastFrameRendered()) == 0, "ghosts behind a wall are culled");
+            context.takeScreenshot("htzdistance-05-culled-behind-wall");
+            server.runCommand(wall + " air");
+            context.waitTicks(10);
+            check(context.computeOnClient(client -> GhostRenderer.lastFrameRendered()) == 3, "ghosts visible again without the wall");
             context.runOnClient(client -> client.options.fov().set(70));
 
             // 3) Walk back: the real entities are resent and replace the ghosts.
