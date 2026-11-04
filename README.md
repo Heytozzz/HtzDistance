@@ -99,15 +99,17 @@ trigger it creates a flat world, builds an armory (408 equipped armor stands) an
 compares every ghost's rendered rotation with the real entity (all 45-degree steps, all frame
 facings and item rotations), writes `htzdistance-selftest-report.txt` plus screenshots and quits.
 
-Results with the author's modpacks (2,484 entities):
+Results with the author's modpacks (2,484 entities), with ghost render states reused across
+frames (re-extracted about once per second):
 
-| Instance                     | Real entities | Ghosts (culling on) | Ghost cost, culling on / off | Capture |
-|------------------------------|---------------|---------------------|------------------------------|---------|
-| 1.21.11, 172 mods (Sodium, Iris, EntityCulling, EMF/ETF) | 59 FPS | 59 FPS | 1.7 / 2.7 ms per frame | 0.036 ms per entity |
-| 26.3, 267 mods (Sodium, EntityCulling, Bobby, EMF/ETF)   | 14 FPS | 15 FPS | 18 / 29 ms per frame   | 0.034 ms per entity |
+| Instance                                                 | Ghost cost, culling on / off | Before caching | FPS real / ghosts | Capture             |
+|----------------------------------------------------------|------------------------------|----------------|-------------------|---------------------|
+| 26.3, 267 mods (Sodium, EntityCulling, Bobby, EMF/ETF)   | 1.6 / 3.1 ms per frame       | 18.1 / 29.0 ms | 13 / 20           | 0.05 ms per entity  |
+| 1.21.11, 172 mods (Sodium, Iris, EntityCulling, EMF/ETF) | 1.5 / 1.7 ms per frame       | 1.7 / 2.7 ms   | capped (59 / 59)  | 0.03 ms per entity  |
 
-Ghosts cost about the same as the real entities; occlusion culling (about 6 ms per pass on its own
-thread) roughly halves the number of ghosts drawn in that scene.
+Ghosts are now cheaper than the real entities they replace. Occlusion culling runs on its own
+thread (about 6-15 ms per pass for 2,484 ghosts, never blocking a frame) and roughly halves the
+number of ghosts drawn in that scene.
 
 ## License
 
