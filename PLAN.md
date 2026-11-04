@@ -185,7 +185,9 @@ Key rules:
       files from another data version are ignored)
 
 ### Step 10 — Learning mode
-- [ ] Sample collection, estimate, apply to thresholds, show learned values in config
+- [x] Sample collection, estimate, apply to thresholds, show learned values in config
+      (per server; midpoint of the medians of removal distances while walking away and
+      addition distances while approaching; teleports filtered; config/htzdistance-learned.json)
 
 ### Step 11 — Multiversion
 - [ ] 1.21.10 / 1.21.11 (new `world.WorldRenderEvents`, submit renderer)

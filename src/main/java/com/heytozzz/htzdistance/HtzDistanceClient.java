@@ -1,5 +1,6 @@
 package com.heytozzz.htzdistance;
 
+import com.heytozzz.htzdistance.capture.RangeLearner;
 import com.heytozzz.htzdistance.config.ConfigManager;
 import com.heytozzz.htzdistance.culling.CullingWorker;
 import com.heytozzz.htzdistance.ghost.GhostManager;
@@ -22,11 +23,13 @@ public final class HtzDistanceClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ConfigManager.load();
+        RangeLearner.get().load();
         GhostManager.get().register();
         GhostManager.get().addListener(new GhostManager.StoreListener() {
             @Override
             public void onStoreClosing(GhostStore store) {
                 CullingWorker.get().clear();
+                RangeLearner.get().save();
             }
         });
         new GhostPersistence().register();

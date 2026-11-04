@@ -45,5 +45,13 @@
   "htzdistance.config.persistence": "Save ghosts to disk",
   "htzdistance.config.persistence.description": "Keep ghosts between sessions, stored per server and dimension.",
   "htzdistance.config.debugLogging": "Debug logging",
-  "htzdistance.config.debugLogging.description": "Log every capture, drop and reconciliation to the game log."
+  "htzdistance.config.debugLogging.description": "Log every capture, drop and reconciliation to the game log.",
+
+  "htzdistance.config.group.learned": "Learned ranges (this server)",
+  "htzdistance.config.group.learned.description": "Ranges measured on the server you are connected to. Used instead of the configured ones when learning mode is on.",
+  "htzdistance.config.learned.noServer": "Join a server or world to see its learned ranges.",
+  "htzdistance.config.learned.value": "%s blocks (%s removals, %s additions)",
+  "htzdistance.config.learned.notEnough": "not enough data (%s removals, %s additions, need %s each)",
+  "htzdistance.config.learned.reset": "Forget learned ranges",
+  "htzdistance.config.learned.reset.description": "Deletes the samples learned on this server. Reopen the screen to refresh the values."
 }

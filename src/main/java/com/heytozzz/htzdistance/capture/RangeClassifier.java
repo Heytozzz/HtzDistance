@@ -3,6 +3,10 @@ package com.heytozzz.htzdistance.capture;
 import com.heytozzz.htzdistance.config.ConfigManager;
 import com.heytozzz.htzdistance.config.HtzConfig;
 import com.heytozzz.htzdistance.ghost.GhostKind;
+import com.heytozzz.htzdistance.ghost.GhostManager;
+import com.heytozzz.htzdistance.ghost.GhostStore;
+
+import java.util.OptionalDouble;
 
 /**
  * Decides whether a removed entity left the server's tracking range or was destroyed.
@@ -14,9 +18,20 @@ public final class RangeClassifier {
     private RangeClassifier() {
     }
 
-    /** Tracking range in blocks currently used for this kind. */
+    /**
+     * Tracking range in blocks currently used for this kind: the learned range of the current
+     * server when learning mode is on and enough samples exist, otherwise the configured one.
+     */
     public static double threshold(GhostKind kind) {
-        return ConfigManager.get().settingsFor(kind).threshold;
+        HtzConfig config = ConfigManager.get();
+        if (config.learningMode) {
+            GhostStore store = GhostManager.get().store();
+            OptionalDouble learned = RangeLearner.get().estimate(store == null ? null : store.key().server(), kind);
+            if (learned.isPresent()) {
+                return learned.getAsDouble();
+            }
+        }
+        return config.settingsFor(kind).threshold;
     }
 
     /**

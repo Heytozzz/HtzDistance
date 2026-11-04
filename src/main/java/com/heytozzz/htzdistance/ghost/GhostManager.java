@@ -3,6 +3,7 @@ package com.heytozzz.htzdistance.ghost;
 import com.heytozzz.htzdistance.HtzDistanceClient;
 import com.heytozzz.htzdistance.capture.GhostSnapshot;
 import com.heytozzz.htzdistance.capture.RangeClassifier;
+import com.heytozzz.htzdistance.capture.RangeLearner;
 import com.heytozzz.htzdistance.capture.SnapshotFactory;
 import com.heytozzz.htzdistance.config.ConfigManager;
 import com.heytozzz.htzdistance.config.HtzConfig;
@@ -88,11 +89,17 @@ public final class GhostManager {
                 continue;
             }
             GhostKind kind = SnapshotFactory.kindOf(entity);
-            if (kind == null || !config.settingsFor(kind).enabled) {
+            if (kind == null) {
+                continue;
+            }
+            double distance = RangeClassifier.horizontalDistance(player.getX(), player.getZ(), entity.getX(), entity.getZ());
+            if (config.learningMode) {
+                RangeLearner.get().onRemoved(current.key().server(), kind, entity, distance);
+            }
+            if (!config.settingsFor(kind).enabled) {
                 continue;
             }
 
-            double distance = RangeClassifier.horizontalDistance(player.getX(), player.getZ(), entity.getX(), entity.getZ());
             if (!RangeClassifier.leftTrackingRange(kind, distance)) {
                 HtzDistanceClient.debug("Dropped {} at {} (distance {} < {}), treated as destroyed",
                         kind, entity.blockPosition(), fmt(distance), fmt(RangeClassifier.innerRange(kind)));
@@ -123,9 +130,15 @@ public final class GhostManager {
         if (kind == null) {
             return;
         }
-        GhostStore current = ensureStore(Minecraft.getInstance(), level);
+        Minecraft minecraft = Minecraft.getInstance();
+        GhostStore current = ensureStore(minecraft, level);
         if (current == null) {
             return;
+        }
+        LocalPlayer player = minecraft.player;
+        if (player != null && ConfigManager.get().learningMode) {
+            double distance = RangeClassifier.horizontalDistance(player.getX(), player.getZ(), entity.getX(), entity.getZ());
+            RangeLearner.get().onAdded(current.key().server(), kind, entity, distance);
         }
         int removed = current.removeNear(kind, entity.getX(), entity.getY(), entity.getZ(), ConfigManager.get().reconcileRadius);
         if (removed > 0) {
@@ -136,6 +149,7 @@ public final class GhostManager {
     private void tick(Minecraft minecraft) {
         GhostStore current = ensureStore(minecraft, minecraft.level);
         LocalPlayer player = minecraft.player;
+        RangeLearner.get().tickPlayer(player);
         if (current == null || player == null || current.size() == 0) {
             return;
         }

@@ -45,5 +45,13 @@
   "htzdistance.config.persistence": "Guardar fantasmas en disco",
   "htzdistance.config.persistence.description": "Conserva los fantasmas entre sesiones, por servidor y dimensión.",
   "htzdistance.config.debugLogging": "Log de depuración",
-  "htzdistance.config.debugLogging.description": "Escribe en el log cada captura, descarte y reconciliación."
+  "htzdistance.config.debugLogging.description": "Escribe en el log cada captura, descarte y reconciliación.",
+
+  "htzdistance.config.group.learned": "Rangos aprendidos (este servidor)",
+  "htzdistance.config.group.learned.description": "Rangos medidos en el servidor al que estás conectado. Se usan en lugar de los configurados si el modo aprendizaje está activado.",
+  "htzdistance.config.learned.noServer": "Entra en un servidor o mundo para ver sus rangos aprendidos.",
+  "htzdistance.config.learned.value": "%s bloques (%s desapariciones, %s apariciones)",
+  "htzdistance.config.learned.notEnough": "faltan datos (%s desapariciones, %s apariciones, se necesitan %s de cada)",
+  "htzdistance.config.learned.reset": "Olvidar rangos aprendidos",
+  "htzdistance.config.learned.reset.description": "Borra las muestras aprendidas en este servidor. Vuelve a abrir la pantalla para ver los valores actualizados."
 }

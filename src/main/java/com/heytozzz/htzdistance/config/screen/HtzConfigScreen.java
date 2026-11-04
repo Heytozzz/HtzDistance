@@ -1,8 +1,13 @@
 package com.heytozzz.htzdistance.config.screen;
 
+import com.heytozzz.htzdistance.capture.RangeLearner;
 import com.heytozzz.htzdistance.config.ConfigManager;
 import com.heytozzz.htzdistance.config.HtzConfig;
 import com.heytozzz.htzdistance.ghost.GhostKind;
+import com.heytozzz.htzdistance.ghost.GhostManager;
+import com.heytozzz.htzdistance.ghost.GhostStore;
+import dev.isxander.yacl3.api.ButtonOption;
+import dev.isxander.yacl3.api.LabelOption;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
@@ -18,6 +23,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import java.awt.Color;
+import java.util.Locale;
+import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -78,6 +85,7 @@ public final class HtzConfigScreen {
                         .build())
                 .option(bool("learningMode", defaults.learningMode, () -> edited.learningMode, v -> edited.learningMode = v))
                 .build());
+        general.group(learnedGroup());
 
         ConfigCategory.Builder rendering = ConfigCategory.createBuilder()
                 .name(text("category.rendering"))
@@ -100,7 +108,7 @@ public final class HtzConfigScreen {
                         .binding(defaults.ghostStyle, () -> edited.ghostStyle, v -> edited.ghostStyle = v)
                         .controller(opt -> EnumControllerBuilder.create(opt)
                                 .enumClass(HtzConfig.GhostStyle.class)
-                                .formatValue(style -> text("ghostStyle." + style.name().toLowerCase(java.util.Locale.ROOT))))
+                                .formatValue(style -> text("ghostStyle." + style.name().toLowerCase(Locale.ROOT))))
                         .build())
                 .option(Option.<Color>createBuilder()
                         .name(text("tintColor"))
@@ -128,6 +136,32 @@ public final class HtzConfigScreen {
                 .save(() -> ConfigManager.apply(edited))
                 .build()
                 .generateScreen(parent);
+    }
+
+    /** Read-only view of the ranges learned on the current server, plus a reset button. */
+    private static OptionGroup learnedGroup() {
+        GhostStore store = GhostManager.get().store();
+        String server = store == null ? null : store.key().server();
+        OptionGroup.Builder group = OptionGroup.createBuilder()
+                .name(text("group.learned"))
+                .description(OptionDescription.of(text("group.learned.description")));
+        if (server == null) {
+            return group.option(LabelOption.create(text("learned.noServer"))).build();
+        }
+        for (GhostKind kind : GhostKind.values()) {
+            OptionalDouble estimate = RangeLearner.get().estimate(server, kind);
+            int[] counts = RangeLearner.get().sampleCounts(server, kind);
+            Component value = estimate.isPresent()
+                    ? Component.translatable(KEY + "learned.value", String.format(Locale.ROOT, "%.2f", estimate.getAsDouble()), counts[0], counts[1])
+                    : Component.translatable(KEY + "learned.notEnough", counts[0], counts[1], RangeLearner.MIN_SAMPLES);
+            group.option(LabelOption.create(Component.empty().append(text("kind." + kind.configKey())).append(": ").append(value)));
+        }
+        group.option(ButtonOption.createBuilder()
+                .name(text("learned.reset"))
+                .description(OptionDescription.of(text("learned.reset.description")))
+                .action(screen -> RangeLearner.get().reset(server))
+                .build());
+        return group.build();
     }
 
     private static Option<Boolean> bool(String key, boolean def, Supplier<Boolean> getter, Consumer<Boolean> setter) {
