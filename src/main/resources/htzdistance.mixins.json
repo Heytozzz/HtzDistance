@@ -4,6 +4,7 @@
   "package": "com.heytozzz.htzdistance.mixin",
   "compatibilityLevel": "${java}",
   "client": [
+    "ClientPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

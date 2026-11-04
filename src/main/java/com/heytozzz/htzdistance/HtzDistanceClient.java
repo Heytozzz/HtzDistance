@@ -1,6 +1,7 @@
 package com.heytozzz.htzdistance;
 
 import com.heytozzz.htzdistance.config.ConfigManager;
+import com.heytozzz.htzdistance.ghost.GhostManager;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,14 @@ public final class HtzDistanceClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ConfigManager.load();
+        GhostManager.get().register();
         LOGGER.info("HtzDistance {} initialized for Minecraft {}", VERSION, MINECRAFT);
+    }
+
+    /** Logs at INFO level when debug logging is enabled in the config. */
+    public static void debug(String message, Object... args) {
+        if (ConfigManager.get().debugLogging) {
+            LOGGER.info("[debug] " + message, args);
+        }
     }
 }

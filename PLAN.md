@@ -147,16 +147,16 @@ Key rules:
       in-range timeout)
 
 ### Step 3 — Capture
-- [ ] `ClientPacketListenerMixin#handleRemoveEntities` capture
-- [ ] `SnapshotFactory` (TagValueOutput with registry access) for the 3 types
-- [ ] `RangeClassifier` (horizontal distance, margin)
-- [ ] Debug log line per capture/drop (English), toggleable
+- [x] `ClientPacketListenerMixin#handleRemoveEntities` capture
+- [x] `SnapshotFactory` (TagValueOutput with registry access) for the 3 types
+- [x] `RangeClassifier` (horizontal distance, margin)
+- [x] Debug log line per capture/drop (English), toggleable
 
 ### Step 4 — Ghost store + reconciliation
-- [ ] `GhostStore` with limits (max count, evict farthest)
-- [ ] Add-entity match (<0.5 blocks, same type)
-- [ ] In-range timeout removal
-- [ ] Clear on dimension change / disconnect
+- [x] `GhostStore` with limits (max count, evict farthest)
+- [x] Add-entity match (<0.5 blocks, same type)
+- [x] In-range timeout removal
+- [x] Clear on dimension change / disconnect
 
 ### Step 5 — Rendering (1.21.8)
 - [ ] Rebuild client-only entity from snapshot (`EntityType.create` + `load(TagValueInput)`),
