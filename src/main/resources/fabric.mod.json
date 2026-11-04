@@ -12,6 +12,9 @@
   "entrypoints": {
     "client": [
       "com.heytozzz.htzdistance.HtzDistanceClient"
+    ],
+    "modmenu": [
+      "com.heytozzz.htzdistance.config.screen.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -23,6 +26,7 @@
     "fabric-api": "*"
   },
   "suggests": {
-    "modmenu": "*"
+    "modmenu": "*",
+    "yet_another_config_lib_v3": "*"
   }
 }

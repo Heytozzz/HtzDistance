@@ -86,6 +86,11 @@ public final class ConfigManager {
         }
     }
 
+    /** Deep copy of the current config, for editing without touching the live instance. */
+    public static HtzConfig copy() {
+        return GSON.fromJson(GSON.toJsonTree(config), HtzConfig.class);
+    }
+
     /** Replaces the whole config (used by the config screen), sanitizes and saves it. */
     public static void apply(HtzConfig newConfig) {
         newConfig.sanitize();

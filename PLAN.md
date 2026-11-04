@@ -176,7 +176,8 @@ Key rules:
 - [x] `LevelDataProvider`, `CullingWorker` thread, visible-set publication, toggle
 
 ### Step 8 — Config screen
-- [ ] YACL screen with all options + Mod Menu entry, English lang file (+ Spanish)
+- [x] YACL screen with all options + Mod Menu entry, English lang file (+ Spanish)
+      (YACL is optional at runtime; it does not require Fabric Language Kotlin)
 
 ### Step 9 — Persistence (optional)
 - [ ] Bobby-style per server/dimension NBT save on disconnect/dimension change, load on join

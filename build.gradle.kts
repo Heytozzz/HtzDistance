@@ -20,6 +20,8 @@ repositories {
     }
     strictMaven("https://maven.terraformersmc.com/releases", "TerraformersMC", "com.terraformersmc")
     strictMaven("https://repo.codemc.io/repository/maven-snapshots", "CodeMC", "com.logisticscraft")
+    strictMaven("https://maven.isxander.dev/releases", "Xander Maven", "dev.isxander")
+    strictMaven("https://maven.quiltmc.org/repository/release", "Quilt", "org.quiltmc.parsers")
 }
 
 dependencies {
@@ -40,6 +42,13 @@ dependencies {
     // Mod Menu is optional at runtime: compiled against for the config button, present in dev runs.
     modCompileOnly("com.terraformersmc:modmenu:${sc.properties.get<String>("deps.modmenu")}")
     modLocalRuntime("com.terraformersmc:modmenu:${sc.properties.get<String>("deps.modmenu")}")
+
+    // YACL builds the config screen; optional at runtime (the JSON file works without it).
+    // Compile against YACL alone; dev runs need its libraries as well, because Loom does not
+    // load the copies nested inside its jar (players get them from that jar).
+    val yacl = "dev.isxander:yet-another-config-lib:${sc.properties.get<String>("deps.yacl")}"
+    modCompileOnly(yacl) { isTransitive = false }
+    modLocalRuntime(yacl)
 }
 
 loom {
