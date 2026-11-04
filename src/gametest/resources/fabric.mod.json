@@ -6,6 +6,7 @@
   "environment": "client",
   "entrypoints": {
     "fabric-client-gametest": [
+      "com.heytozzz.htzdistance.test.ConfigScreenClientTest",
       "com.heytozzz.htzdistance.test.GhostLifecycleClientTest"
     ]
   },
