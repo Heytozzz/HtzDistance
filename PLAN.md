@@ -180,7 +180,9 @@ Key rules:
       (YACL is optional at runtime; it does not require Fabric Language Kotlin)
 
 ### Step 9 — Persistence (optional)
-- [ ] Bobby-style per server/dimension NBT save on disconnect/dimension change, load on join
+- [x] Bobby-style per server/dimension NBT save on disconnect/dimension change, load on join
+      (`<game dir>/htzdistance/<server>/<dimension>/ghosts.dat`, async writes, 5-min autosave,
+      files from another data version are ignored)
 
 ### Step 10 — Learning mode
 - [ ] Sample collection, estimate, apply to thresholds, show learned values in config
