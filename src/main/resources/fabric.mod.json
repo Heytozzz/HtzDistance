@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "Keeps rendering armor stands and item frames as non-interactive ghosts after the server stops tracking them.",
+  "authors": [
+    "Heytozzz"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.heytozzz.htzdistance.HtzDistanceClient"
+    ]
+  },
+  "mixins": [
+    "htzdistance.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader}",
+    "minecraft": "${minecraft}",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
