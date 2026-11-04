@@ -36,7 +36,7 @@ public final class LearningClientTest implements FabricClientGameTest {
         });
 
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
-            world.getClientWorld().waitForChunksRender();
+            TestSupport.waitForChunks(world);
             TestServerContext server = world.getServer();
             BlockPos base = TestSupport.surface(server);
             int x = base.getX();

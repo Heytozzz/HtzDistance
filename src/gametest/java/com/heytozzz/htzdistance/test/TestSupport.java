@@ -8,6 +8,7 @@ import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -25,12 +26,24 @@ final class TestSupport {
     private TestSupport() {
     }
 
-    /** Surface position at the world spawn. */
+    /** Surface position below the (only) player. */
     static BlockPos surface(TestServerContext server) {
         return server.computeOnServer(s -> {
             ServerLevel level = s.overworld();
-            return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, level.getSharedSpawnPos());
+            BlockPos player = s.getPlayerList().getPlayers().getFirst().blockPosition();
+            return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, player);
         });
+    }
+
+    /** Waits until the client has rendered the chunks around the player. */
+    static void waitForChunks(TestSingleplayerContext world) {
+        //? if >=26.2 {
+        /*world.getConnection().waitForChunksRender();
+        *///?} else if >=26.1 {
+        /*world.getClientLevel().waitForChunksRender();
+        *///?} else {
+        world.getClientWorld().waitForChunksRender();
+        //?}
     }
 
     /**

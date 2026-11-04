@@ -1,7 +1,8 @@
 package com.heytozzz.htzdistance.test.mixin;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import com.heytozzz.htzdistance.capture.SnapshotFactory;
+import com.heytozzz.htzdistance.ghost.GhostKind;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,10 +22,10 @@ public abstract class TrackedEntityRangeMixin {
 
     @Inject(method = "getEffectiveRange", at = @At("HEAD"), cancellable = true)
     private void htzdistanceTest$serverLikeRange(CallbackInfoReturnable<Integer> cir) {
-        EntityType<?> type = entity.getType();
-        if (type == EntityType.ARMOR_STAND) {
+        GhostKind kind = SnapshotFactory.kindOf(entity);
+        if (kind == GhostKind.ARMOR_STAND) {
             cir.setReturnValue(16);
-        } else if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME) {
+        } else if (kind != null) {
             cir.setReturnValue(8);
         }
     }

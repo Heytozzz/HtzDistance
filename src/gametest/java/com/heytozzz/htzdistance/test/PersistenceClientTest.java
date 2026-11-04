@@ -25,7 +25,6 @@ public final class PersistenceClientTest implements FabricClientGameTest {
     public void runTest(ClientGameTestContext context) {
         context.runOnClient(client -> {
             client.options.renderDistance().set(6);
-            client.options.hideGui = true;
         });
         TestSupport.resetConfig(context, config -> config.persistence = true);
 
@@ -34,7 +33,7 @@ public final class PersistenceClientTest implements FabricClientGameTest {
         int y;
         int z;
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
-            world.getClientWorld().waitForChunksRender();
+            TestSupport.waitForChunks(world);
             save = world.getWorldSave();
             BlockPos base = TestSupport.surface(world.getServer());
             x = base.getX();
@@ -52,7 +51,7 @@ public final class PersistenceClientTest implements FabricClientGameTest {
         context.waitTicks(20);
 
         try (TestSingleplayerContext world = save.open()) {
-            world.getClientWorld().waitForChunksRender();
+            TestSupport.waitForChunks(world);
             context.waitTicks(20);
             assertGhosts(context, 3, "ghosts loaded from disk after re-joining");
             int mapId = context.computeOnClient(client -> {

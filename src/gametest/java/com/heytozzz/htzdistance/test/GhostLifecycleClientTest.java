@@ -31,12 +31,11 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
     public void runTest(ClientGameTestContext context) {
         context.runOnClient(client -> {
             client.options.renderDistance().set(6);
-            client.options.hideGui = true;
         });
         TestSupport.resetConfig(context, config -> config.inRangeTimeoutSeconds = 2.0);
 
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
-            world.getClientWorld().waitForChunksRender();
+            TestSupport.waitForChunks(world);
             TestServerContext server = world.getServer();
 
             BlockPos base = TestSupport.surface(server);
@@ -51,7 +50,7 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             TestSupport.spawnTestEntities(server, x, y, ez);
 
             context.waitTicks(60);
-            world.getClientWorld().waitForChunksRender();
+            TestSupport.waitForChunks(world);
             context.takeScreenshot("htzdistance-01-real-entities");
             assertGhosts(context, 0, "no ghosts while everything is in range");
 
