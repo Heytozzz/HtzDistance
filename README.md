@@ -89,6 +89,26 @@ integrated server the target server's ranges (16 blocks for armor stands, 8 for 
 They cover capture, reconciliation, destroyed-entity detection, the in-range timeout, map
 capture, styles, occlusion culling, persistence, learning mode and the config screen.
 
+## Self-test in a real launcher instance
+
+`src/selftest` builds a separate test mod (`./gradlew :1.21.11:selftestJar`, output in
+`versions/<mc>/build/libs/htzdistance-selftest-<mc>.jar`). It is never part of the release jar
+and does nothing unless `htzdistance-selftest.trigger` exists in the game directory. With the
+trigger it creates a flat world, builds an armory (408 equipped armor stands) and a warehouse
+(about 2,000 item frames, 144 maps), measures real entities vs ghosts (culling on/off) vs nothing,
+compares every ghost's rendered rotation with the real entity (all 45-degree steps, all frame
+facings and item rotations), writes `htzdistance-selftest-report.txt` plus screenshots and quits.
+
+Results with the author's modpacks (2,484 entities):
+
+| Instance                     | Real entities | Ghosts (culling on) | Ghost cost, culling on / off | Capture |
+|------------------------------|---------------|---------------------|------------------------------|---------|
+| 1.21.11, 172 mods (Sodium, Iris, EntityCulling, EMF/ETF) | 59 FPS | 59 FPS | 1.7 / 2.7 ms per frame | 0.036 ms per entity |
+| 26.3, 267 mods (Sodium, EntityCulling, Bobby, EMF/ETF)   | 14 FPS | 15 FPS | 18 / 29 ms per frame   | 0.034 ms per entity |
+
+Ghosts cost about the same as the real entities; occlusion culling (about 6 ms per pass on its own
+thread) roughly halves the number of ghosts drawn in that scene.
+
 ## License
 
 MIT, see [LICENSE](LICENSE). Bundles LogisticsCraft OcclusionCulling (MIT).
