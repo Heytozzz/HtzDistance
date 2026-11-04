@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "htzdistance-selftest",
+  "version": "1.0.0",
+  "name": "HtzDistance Self-Test",
+  "description": "Test harness for HtzDistance. Does nothing unless htzdistance-selftest.trigger exists in the game directory.",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.heytozzz.htzdistance.selftest.SelfTestClient"
+    ]
+  },
+  "mixins": [
+    "htzdistance-selftest.mixins.json"
+  ],
+  "depends": {
+    "htzdistance": "*"
+  }
+}
