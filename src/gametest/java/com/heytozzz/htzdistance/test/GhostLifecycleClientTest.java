@@ -1,9 +1,7 @@
 package com.heytozzz.htzdistance.test;
 
 import com.heytozzz.htzdistance.HtzDistanceClient;
-import com.heytozzz.htzdistance.config.ConfigManager;
 import com.heytozzz.htzdistance.config.HtzConfig;
-import com.heytozzz.htzdistance.ghost.Ghost;
 import com.heytozzz.htzdistance.ghost.GhostKind;
 import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
@@ -13,16 +11,12 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.decoration.GlowItemFrame;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import java.util.Locale;
-import java.util.function.Consumer;
+
+import static com.heytozzz.htzdistance.test.TestSupport.assertGhosts;
+import static com.heytozzz.htzdistance.test.TestSupport.check;
+import static com.heytozzz.htzdistance.test.TestSupport.tp;
 
 /**
  * End-to-end check of the ghost lifecycle in a singleplayer world.
@@ -39,19 +33,13 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             client.options.renderDistance().set(6);
             client.options.hideGui = true;
         });
-        updateConfig(context, config -> {
-            config.inRangeTimeoutSeconds = 2.0;
-            config.debugLogging = true;
-        });
+        TestSupport.resetConfig(context, config -> config.inRangeTimeoutSeconds = 2.0);
 
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
             world.getClientWorld().waitForChunksRender();
             TestServerContext server = world.getServer();
 
-            BlockPos base = server.computeOnServer(s -> {
-                ServerLevel level = s.overworld();
-                return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, level.getSharedSpawnPos());
-            });
+            BlockPos base = TestSupport.surface(server);
             int x = base.getX();
             int y = base.getY();
             int z = base.getZ();
@@ -60,7 +48,7 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             server.runCommand("gamerule doDaylightCycle false");
             server.runCommand("time set noon");
             server.runCommand(tp(x + 0.5, y, z + 6.0));
-            spawnTestEntities(server, x, y, ez, z);
+            TestSupport.spawnTestEntities(server, x, y, ez);
 
             context.waitTicks(60);
             world.getClientWorld().waitForChunksRender();
@@ -87,13 +75,13 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-02-ghosts-normal");
 
-            updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.TINT);
+            TestSupport.updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.TINT);
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-03-ghosts-tint");
-            updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.TRANSLUCENT);
+            TestSupport.updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.TRANSLUCENT);
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-04-ghosts-translucent");
-            updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.NORMAL);
+            TestSupport.updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.NORMAL);
 
             // Occlusion culling: a wall between the player and the ghosts hides them.
             String wall = String.format(Locale.ROOT, "fill %d %d %d %d %d %d", x - 8, y, z - 6, x + 8, y + 5, z - 6);
@@ -130,69 +118,5 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
         }
 
         HtzDistanceClient.LOGGER.info("[gametest] GhostLifecycleClientTest passed");
-    }
-
-    private static void spawnTestEntities(TestServerContext server, int x, int y, int ez, int z) {
-        // Armor stand with gear and a custom pose, facing the player (north).
-        server.runCommand(String.format(Locale.ROOT,
-                "summon armor_stand %d.5 %d %d.5 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],"
-                        + "equipment:{head:{id:\"minecraft:diamond_helmet\"},chest:{id:\"minecraft:golden_chestplate\"},"
-                        + "mainhand:{id:\"minecraft:diamond_sword\"}},Pose:{RightArm:[-90f,0f,0f]}}",
-                x, y, ez));
-        // Item frame with a rotated apple.
-        server.runCommand(String.format(Locale.ROOT, "setblock %d %d %d stone", x - 2, y + 1, ez + 1));
-        server.runCommand(String.format(Locale.ROOT,
-                "summon item_frame %d %d %d {Facing:2b,ItemRotation:1b,Item:{id:\"minecraft:apple\",count:1}}",
-                x - 2, y + 1, ez));
-        // Glow item frame with a checkered map.
-        server.runCommand(String.format(Locale.ROOT, "setblock %d %d %d stone", x + 2, y + 1, ez + 1));
-        server.runOnServer(s -> {
-            ServerLevel level = s.overworld();
-            ItemStack map = MapItem.create(level, x, z, (byte) 0, false, false);
-            MapItemSavedData data = MapItem.getSavedData(map, level);
-            for (int px = 0; px < 128; px++) {
-                for (int py = 0; py < 128; py++) {
-                    data.setColor(px, py, (byte) (((px / 16 + py / 16) % 2 == 0) ? 18 * 4 + 2 : 29 * 4 + 2));
-                }
-            }
-            GlowItemFrame frame = new GlowItemFrame(level, new BlockPos(x + 2, y + 1, ez), Direction.NORTH);
-            frame.setItem(map);
-            level.addFreshEntity(frame);
-        });
-    }
-
-    private static void updateConfig(ClientGameTestContext context, Consumer<HtzConfig> change) {
-        context.runOnClient(client -> {
-            HtzConfig config = ConfigManager.get();
-            change.accept(config);
-            ConfigManager.apply(config);
-        });
-    }
-
-    private static String tp(double x, double y, double z) {
-        // Yaw 0 faces south (+Z), where the test entities are.
-        return String.format(Locale.ROOT, "tp @p %.2f %d %.2f 0 0", x, (int) y, z);
-    }
-
-    private static void assertGhosts(ClientGameTestContext context, int expected, String what) {
-        int actual = context.computeOnClient(client -> {
-            GhostStore store = GhostManager.get().store();
-            return store == null ? -1 : store.size();
-        });
-        if (actual != expected) {
-            String kinds = context.computeOnClient(client -> {
-                GhostStore store = GhostManager.get().store();
-                return store == null ? "none" : store.view().stream().map(Ghost::kind).toList().toString();
-            });
-            throw new AssertionError(what + ": expected " + expected + " ghosts, got " + actual + " " + kinds);
-        }
-        HtzDistanceClient.LOGGER.info("[gametest] OK: {} ({} ghosts)", what, actual);
-    }
-
-    private static void check(boolean condition, String what) {
-        if (!condition) {
-            throw new AssertionError("Check failed: " + what);
-        }
-        HtzDistanceClient.LOGGER.info("[gametest] OK: {}", what);
     }
 }
