@@ -77,6 +77,12 @@ public final class HtzConfig {
     /** Opacity in [0.1, 1], used when {@link #ghostStyle} is {@link GhostStyle#TRANSLUCENT}. */
     public float translucentAlpha = 0.6f;
 
+    /**
+     * Reuse ghost render states across frames (Minecraft 1.21.10+): much cheaper with many ghosts.
+     * Items are still resolved every frame. Turn off if a mod draws ghosts incorrectly.
+     */
+    public boolean reuseRenderStates = true;
+
     /** Learn the real disappearance distance of each kind from observed removals. */
     public boolean learningMode = false;
 

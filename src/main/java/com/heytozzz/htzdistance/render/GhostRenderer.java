@@ -157,10 +157,15 @@ public final class GhostRenderer {
                 // Ghosts never move or animate, so their render state is reused across frames and
                 // only re-extracted about once per second (staggered per ghost to avoid spikes),
                 // which keeps light and camera distance fresh enough.
-                EntityRenderState state = (EntityRenderState) ghost.cachedRenderState(now);
+                EntityRenderState state = config.reuseRenderStates ? (EntityRenderState) ghost.cachedRenderState(now) : null;
                 if (state == null) {
                     state = dispatcher.extractEntity(entity, partialTick);
-                    ghost.setCachedRenderState(state, now + STATE_REFRESH_NANOS + (System.identityHashCode(ghost) & 0x1FFFFFFFL) % STATE_REFRESH_NANOS);
+                    if (config.reuseRenderStates) {
+                        ghost.setCachedRenderState(state, now + STATE_REFRESH_NANOS + (System.identityHashCode(ghost) & 0x1FFFFFFFL) % STATE_REFRESH_NANOS);
+                    }
+                } else {
+                    // Items are resolved every frame: some mods rely on it (see ItemStateRefresh).
+                    ItemStateRefresh.refresh(state, entity, partialTick);
                 }
                 state.outlineColor = outline;
                 if (outline != 0) {

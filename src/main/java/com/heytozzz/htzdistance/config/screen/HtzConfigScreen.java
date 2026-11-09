@@ -102,6 +102,7 @@ public final class HtzConfigScreen {
                         .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(16, 8192).step(16))
                         .build())
                 .option(bool("occlusionCulling", defaults.occlusionCulling, () -> edited.occlusionCulling, v -> edited.occlusionCulling = v))
+                .option(bool("reuseRenderStates", defaults.reuseRenderStates, () -> edited.reuseRenderStates, v -> edited.reuseRenderStates = v))
                 .option(Option.<HtzConfig.GhostStyle>createBuilder()
                         .name(text("ghostStyle"))
                         .description(OptionDescription.of(text("ghostStyle.description")))
