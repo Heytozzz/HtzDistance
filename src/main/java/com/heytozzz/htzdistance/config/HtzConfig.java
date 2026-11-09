@@ -40,6 +40,7 @@ public final class HtzConfig {
     public KindSettings armorStand = new KindSettings(GhostKind.ARMOR_STAND.defaultThreshold());
     public KindSettings itemFrame = new KindSettings(GhostKind.ITEM_FRAME.defaultThreshold());
     public KindSettings glowItemFrame = new KindSettings(GhostKind.GLOW_ITEM_FRAME.defaultThreshold());
+    public KindSettings painting = new KindSettings(GhostKind.PAINTING.defaultThreshold());
 
     /**
      * Tolerance (blocks) around the threshold. A removal counts as "left tracking range" when the
@@ -64,7 +65,7 @@ public final class HtzConfig {
     public double reconcileRadius = 0.5;
 
     /** Save ghosts to disk per server and dimension, and load them back on join. */
-    public boolean persistence = false;
+    public boolean persistence = true;
 
     /** Skip rendering ghosts hidden behind blocks (asynchronous ray tracing). */
     public boolean occlusionCulling = true;
@@ -94,6 +95,7 @@ public final class HtzConfig {
             case ARMOR_STAND -> armorStand;
             case ITEM_FRAME -> itemFrame;
             case GLOW_ITEM_FRAME -> glowItemFrame;
+            case PAINTING -> painting;
         };
     }
 
@@ -155,6 +157,7 @@ public final class HtzConfig {
             case ARMOR_STAND -> armorStand = settings;
             case ITEM_FRAME -> itemFrame = settings;
             case GLOW_ITEM_FRAME -> glowItemFrame = settings;
+            case PAINTING -> painting = settings;
         }
     }
 

@@ -10,11 +10,12 @@
   "htzdistance.config.kind.armorStand": "Soportes para armadura",
   "htzdistance.config.kind.itemFrame": "Marcos",
   "htzdistance.config.kind.glowItemFrame": "Marcos luminosos",
+  "htzdistance.config.kind.painting": "Cuadros",
   "htzdistance.config.kind.description": "Ajustes para este tipo de entidad.",
   "htzdistance.config.kind.enabled": "Mantener como fantasma",
   "htzdistance.config.kind.enabled.description": "Sigue mostrando este tipo de entidad cuando el servidor deja de enviarla.",
   "htzdistance.config.kind.threshold": "Rango de seguimiento del servidor",
-  "htzdistance.config.kind.threshold.description": "Distancia horizontal (bloques) a la que el servidor deja de enviar este tipo. Por defecto, la medida en el servidor: 16 para soportes, 8 para marcos.",
+  "htzdistance.config.kind.threshold.description": "Distancia horizontal (bloques) a la que el servidor deja de enviar este tipo. Por defecto, la medida en el servidor: 16 para soportes, 8 para marcos y cuadros.",
 
   "htzdistance.config.group.detection": "Detección",
   "htzdistance.config.thresholdMargin": "Margen del rango",

@@ -10,11 +10,12 @@
   "htzdistance.config.kind.armorStand": "Armor stands",
   "htzdistance.config.kind.itemFrame": "Item frames",
   "htzdistance.config.kind.glowItemFrame": "Glow item frames",
+  "htzdistance.config.kind.painting": "Paintings",
   "htzdistance.config.kind.description": "Settings for this entity type.",
   "htzdistance.config.kind.enabled": "Keep as ghost",
   "htzdistance.config.kind.enabled.description": "Keep showing this entity type after the server stops sending it.",
   "htzdistance.config.kind.threshold": "Server tracking range",
-  "htzdistance.config.kind.threshold.description": "Horizontal distance (blocks) at which the server stops sending this entity type. Defaults match the measured server: 16 for armor stands, 8 for item frames.",
+  "htzdistance.config.kind.threshold.description": "Horizontal distance (blocks) at which the server stops sending this entity type. Defaults match the measured server: 16 for armor stands, 8 for item frames and paintings.",
 
   "htzdistance.config.group.detection": "Detection",
   "htzdistance.config.thresholdMargin": "Range margin",

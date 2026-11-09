@@ -1,7 +1,7 @@
 # HtzDistance
 
-Client-only Fabric mod that keeps showing **armor stands**, **item frames** and **glow item
-frames** after the server stops sending them because you walked out of its entity tracking
+Client-only Fabric mod that keeps showing **armor stands**, **item frames**, **glow item
+frames** and **paintings** after the server stops sending them because you walked out of its entity tracking
 range. Right before the client deletes such an entity, the mod takes a snapshot of it and keeps
 drawing it as a **ghost** until the real entity comes back into range.
 
@@ -22,7 +22,7 @@ cause any packet to be sent to the server.
   library (MIT); ghosts hidden behind blocks are skipped.
 - **Learning mode** (optional): measures the real disappearance distance of each entity type on
   each server and uses it instead of the configured values.
-- **Persistence** (optional): ghosts are saved per server and dimension in
+- **Persistence** (on by default): ghosts are saved per server and dimension in
   `<game dir>/htzdistance/<server>/<dimension>/ghosts.dat`, like Bobby.
 - Limits for max ghost count and max render distance.
 - Config screen through Mod Menu + YACL (both optional); the config file is
@@ -56,12 +56,13 @@ horizontally, X/Z only):
 | Armor stand tracking range    | 16      |
 | Item frame tracking range     | 8       |
 | Glow item frame tracking range| 8       |
+| Painting tracking range       | 8       |
 | Range margin                  | 1.5     |
 | "Destroyed" timeout           | 5 s     |
 | Max ghost render distance     | 96      |
 | Max ghosts per dimension      | 1024    |
 | Occlusion culling             | on      |
-| Persistence                   | off     |
+| Persistence                   | on      |
 | Learning mode                 | off     |
 
 ## Compatibility

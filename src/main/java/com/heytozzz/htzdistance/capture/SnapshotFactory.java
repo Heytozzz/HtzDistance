@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.maps.MapId;
@@ -53,8 +54,11 @@ public final class SnapshotFactory {
 
             Direction direction = null;
             MapSnapshot map = null;
+            if (entity instanceof HangingEntity hanging) {
+                // Item frames and paintings.
+                direction = hanging.getDirection();
+            }
             if (entity instanceof ItemFrame frame) {
-                direction = frame.getDirection();
                 map = captureMap(frame.getItem(), level);
             }
 

@@ -10,11 +10,13 @@ import net.minecraft.world.entity.EntityType;
  *
  * <p>Default thresholds come from measurements on the target server: an armor stand disappears
  * when the player stands 16 blocks away from it, an item frame (glow or not) at 8 blocks.
+ * Paintings share the item frames' Spigot/Paper tracking category ("misc"), so they default to 8.
  */
 public enum GhostKind {
     ARMOR_STAND("armorStand", 16.0),
     ITEM_FRAME("itemFrame", 8.0),
-    GLOW_ITEM_FRAME("glowItemFrame", 8.0);
+    GLOW_ITEM_FRAME("glowItemFrame", 8.0),
+    PAINTING("painting", 8.0);
 
     private final String configKey;
     private final double defaultThreshold;
@@ -41,10 +43,12 @@ public enum GhostKind {
             /*case ARMOR_STAND -> EntityTypes.ARMOR_STAND;
             case ITEM_FRAME -> EntityTypes.ITEM_FRAME;
             case GLOW_ITEM_FRAME -> EntityTypes.GLOW_ITEM_FRAME;
+            case PAINTING -> EntityTypes.PAINTING;
             *///?} else {
             case ARMOR_STAND -> EntityType.ARMOR_STAND;
             case ITEM_FRAME -> EntityType.ITEM_FRAME;
             case GLOW_ITEM_FRAME -> EntityType.GLOW_ITEM_FRAME;
+            case PAINTING -> EntityType.PAINTING;
             //?}
         };
     }

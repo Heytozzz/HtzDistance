@@ -143,6 +143,10 @@ public final class CullingWorker {
         if (snapshot.kind() == GhostKind.ARMOR_STAND) {
             aabbMin.set(x - 0.5, y, z - 0.5);
             aabbMax.set(x + 0.5, y + 2.0, z + 0.5);
+        } else if (snapshot.kind() == GhostKind.PAINTING) {
+            // Paintings are up to 4x4 blocks around their position.
+            aabbMin.set(x - 2.0, y - 2.0, z - 2.0);
+            aabbMax.set(x + 2.0, y + 2.0, z + 2.0);
         } else {
             aabbMin.set(x - 0.5, y - 0.5, z - 0.5);
             aabbMax.set(x + 0.5, y + 0.5, z + 0.5);
