@@ -107,6 +107,7 @@ final class SelfTestRun {
     private int expectedStands;
     private int expectedFrames;
     private int nearMaps;
+    private int totems;
 
     // Options restored at the end.
     private int savedRenderDistance;
@@ -268,6 +269,31 @@ final class SelfTestRun {
         steps.add(waitTicks(60));
         steps.add(screenshot("ghost-rotations"));
         steps.add(this::checkGhostRotations);
+        // Flicker check: one screenshot per frame for 20 frames (frame rate limited to 20).
+        steps.add(mc -> {
+            mc.options.framerateLimit().set(20);
+            return true;
+        });
+        steps.add(waitTicks(20));
+        for (int i = 0; i < 20; i++) {
+            steps.add(screenshot(String.format(Locale.ROOT, "burst-%02d", i)));
+            steps.add(waitTicks(1));
+        }
+        steps.add(mc -> {
+            mc.options.framerateLimit().set(260);
+            return true;
+        });
+        steps.add(mc -> {
+            overview(mc);
+            updateConfig(c -> c.reuseRenderStates = false);
+            return true;
+        });
+        steps.add(waitTicks(60));
+        steps.addAll(measure("Ghosts, render state reuse off (culling on)"));
+        steps.add(mc -> {
+            updateConfig(c -> c.reuseRenderStates = true);
+            return true;
+        });
 
         // Phase 3: baseline without the mod drawing anything.
         steps.add(mc -> {
@@ -378,7 +404,7 @@ final class SelfTestRun {
                 run(server, String.format(Locale.ROOT,
                         "summon armor_stand %d.5 %d %d.5 {Rotation:[%df,0f],ShowArms:1b,NoBasePlate:1b,"
                                 + "equipment:{head:{id:\"minecraft:carved_pumpkin\"},mainhand:{id:\"minecraft:diamond_sword\"},"
-                                + "offhand:{id:\"minecraft:shield\"}}}",
+                                + "offhand:{id:\"minecraft:totem_of_undying\"}}}",
                         bx - 14 + i * 4, y, bz + 12, i * 45));
                 stands++;
             }
@@ -386,6 +412,12 @@ final class SelfTestRun {
             for (int i = 0; i < 8; i++) {
                 spawnFrame(level, new BlockPos(bx - 14 + i * 4, y + 1, bz + 20), Direction.NORTH, item("arrow"), i, false);
                 frames++;
+            }
+            // Totems between the arrows (mods like MyTotemDoll replace them with dolls).
+            for (int i = 0; i < 7; i++) {
+                spawnFrame(level, new BlockPos(bx - 12 + i * 4, y + 1, bz + 20), Direction.NORTH, item("totem_of_undying"), 0, false);
+                frames++;
+                totems++;
             }
             // Map wall close to the player (map data is only synced inside the simulation distance).
             int mapIndex = 0;
@@ -562,7 +594,7 @@ final class SelfTestRun {
             }
         }
         check(standsChecked == 8, "all 8 rotation-row armor stands checked (" + standsChecked + ")");
-        check(framesChecked == 12 + nearMaps, "all " + (12 + nearMaps) + " rotation-row item frames checked (" + framesChecked + ")");
+        check(framesChecked == 12 + nearMaps + totems, "all " + (12 + nearMaps + totems) + " rotation-row item frames checked (" + framesChecked + ")");
         return true;
     }
 
