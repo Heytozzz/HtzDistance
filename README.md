@@ -25,6 +25,20 @@ cause any packet to be sent to the server.
 - **Persistence** (on by default): ghosts are saved per server and dimension in
   `<game dir>/htzdistance/<server>/<dimension>/ghosts.dat`, like Bobby.
 - Limits for max ghost count and max render distance.
+- **Show/hide key** (default `H`, rebindable in Controls): hides all ghosts without forgetting
+  them. Ghosts are visible again after a restart.
+- **F3 stats**: ghost counts per type, ghosts drawn and the average cost per frame and per
+  culling pass. From 1.21.10 on it is the `htzdistance:ghosts` entry of the debug options
+  (F3 + F6), switched on for the F3 screen the first time the mod runs.
+- **`/htzdistance` client command**:
+
+  | Command                      | Effect                                                         |
+  |------------------------------|----------------------------------------------------------------|
+  | `/htzdistance` or `stats`    | Shows the same stats as F3 in chat                             |
+  | `/htzdistance toggle`        | Hides or shows the ghosts, like the key                        |
+  | `/htzdistance clear`         | Forgets the ghosts of the current dimension                    |
+  | `/htzdistance clear <radius>`| Forgets the ghosts within that many blocks of you              |
+  | `/htzdistance clear all`     | Forgets the ghosts of every dimension of this server, saved files included |
 - Config screen through Mod Menu + YACL (both optional); the config file is
   `config/htzdistance.json`.
 
