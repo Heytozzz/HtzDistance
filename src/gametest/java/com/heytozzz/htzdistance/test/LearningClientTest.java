@@ -57,7 +57,8 @@ public final class LearningClientTest implements FabricClientGameTest {
                 context.waitTicks(10);
             }
 
-            for (GhostKind kind : GhostKind.values()) {
+            // Only the kinds spawned by spawnTestEntities have samples (no painting).
+            for (GhostKind kind : new GhostKind[]{GhostKind.ARMOR_STAND, GhostKind.ITEM_FRAME, GhostKind.GLOW_ITEM_FRAME}) {
                 double learned = context.computeOnClient(client -> RangeClassifier.threshold(kind));
                 double expected = kind == GhostKind.ARMOR_STAND ? 16.0 : 8.0;
                 check(Math.abs(learned - expected) <= TOLERANCE,
