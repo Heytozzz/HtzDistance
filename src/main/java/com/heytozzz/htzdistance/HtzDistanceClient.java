@@ -7,6 +7,9 @@ import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
 import com.heytozzz.htzdistance.persist.GhostPersistence;
 import com.heytozzz.htzdistance.render.RenderHook;
+import com.heytozzz.htzdistance.tools.DebugOverlay;
+import com.heytozzz.htzdistance.tools.GhostToggle;
+import com.heytozzz.htzdistance.tools.HtzCommands;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,9 @@ public final class HtzDistanceClient implements ClientModInitializer {
         });
         new GhostPersistence().register();
         RenderHook.register();
+        GhostToggle.register();
+        HtzCommands.register();
+        DebugOverlay.register();
         CullingWorker.get().start();
         LOGGER.info("HtzDistance {} initialized for Minecraft {}", VERSION, MINECRAFT);
     }

@@ -8,6 +8,7 @@ import com.heytozzz.htzdistance.culling.CullingWorker;
 import com.heytozzz.htzdistance.ghost.Ghost;
 import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
+import com.heytozzz.htzdistance.tools.GhostToggle;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -61,7 +62,7 @@ public final class GhostRenderer {
         ClientLevel level = minecraft.level;
         GhostStore store = GhostManager.get().store();
         HtzConfig config = ConfigManager.get();
-        if (level == null || store == null || store.size() == 0 || !config.enabled) {
+        if (level == null || store == null || store.size() == 0 || !config.enabled || GhostToggle.isHidden()) {
             // Nothing to draw: stop the culling worker from tracing a stale ghost list.
             CullingWorker.get().clear();
             return result;

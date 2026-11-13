@@ -24,10 +24,12 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Optional on-disk storage of ghosts, one file per server and dimension, in the style of Bobby:
@@ -47,10 +49,13 @@ public final class GhostPersistence implements GhostManager.StoreListener {
         return thread;
     });
 
+    private static GhostPersistence instance;
+
     private int savedRevision = -1;
     private long lastSave;
 
     public void register() {
+        instance = this;
         GhostManager.get().addListener(this);
         ClientTickEvents.END_CLIENT_TICK.register(this::autosave);
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
@@ -98,6 +103,37 @@ public final class GhostPersistence implements GhostManager.StoreListener {
         } catch (IOException | RuntimeException e) {
             HtzDistanceClient.LOGGER.warn("Could not read ghosts from {}", file, e);
         }
+    }
+
+    /** Writes the current store now (after a manual clear), instead of at the next autosave. */
+    public static void saveNow() {
+        GhostStore store = GhostManager.get().store();
+        if (instance != null && store != null) {
+            instance.save(store);
+        }
+    }
+
+    /** Deletes the saved ghosts of every dimension of the given server. */
+    public static void forgetServer(String server) {
+        if (instance == null) {
+            return;
+        }
+        Path root = Minecraft.getInstance().gameDirectory.toPath().resolve(HtzDistanceClient.MOD_ID);
+        Path dir = root.resolve(sanitize(server));
+        if (!dir.normalize().startsWith(root.normalize()) || dir.normalize().equals(root.normalize())) {
+            return;
+        }
+        instance.submit(() -> {
+            if (!Files.isDirectory(dir)) {
+                return;
+            }
+            try (Stream<Path> paths = Files.walk(dir)) {
+                for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
+                    Files.deleteIfExists(path);
+                }
+            }
+            HtzDistanceClient.debug("Deleted saved ghosts in {}", dir);
+        });
     }
 
     @Override

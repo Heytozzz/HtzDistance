@@ -87,6 +87,12 @@ public final class HtzConfig {
     /** Learn the real disappearance distance of each kind from observed removals. */
     public boolean learningMode = false;
 
+    /**
+     * Set once the mod has switched its F3 entry on (Minecraft 1.21.10+). Kept so that a player
+     * who turns the entry off later is not overridden.
+     */
+    public boolean debugEntryEnabledOnce = false;
+
     /** Log every capture, drop and reconciliation decision. */
     public boolean debugLogging = false;
 

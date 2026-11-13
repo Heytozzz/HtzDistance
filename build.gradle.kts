@@ -142,6 +142,7 @@ tasks {
         val clientMixins = buildList {
             add("ClientPacketListenerMixin")
             if (sc.current.parsed < "1.21.10") {
+                add("DebugScreenOverlayMixin")
                 add("render.BufferSourceMixin")
                 add("render.CompositeRenderTypeAccessor")
                 add("render.CompositeStateAccessor")

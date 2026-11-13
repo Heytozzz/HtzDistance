@@ -3,10 +3,8 @@
   "htzdistance.config.category.general": "General",
   "htzdistance.config.category.rendering": "Rendering",
   "htzdistance.config.category.storage": "Storage & Debug",
-
   "htzdistance.config.enabled": "Enabled",
   "htzdistance.config.enabled.description": "Master switch. When off, no ghosts are captured or drawn.",
-
   "htzdistance.config.kind.armorStand": "Armor stands",
   "htzdistance.config.kind.itemFrame": "Item frames",
   "htzdistance.config.kind.glowItemFrame": "Glow item frames",
@@ -16,7 +14,6 @@
   "htzdistance.config.kind.enabled.description": "Keep showing this entity type after the server stops sending it.",
   "htzdistance.config.kind.threshold": "Server tracking range",
   "htzdistance.config.kind.threshold.description": "Horizontal distance (blocks) at which the server stops sending this entity type. Defaults match the measured server: 16 for armor stands, 8 for item frames and paintings.",
-
   "htzdistance.config.group.detection": "Detection",
   "htzdistance.config.thresholdMargin": "Range margin",
   "htzdistance.config.thresholdMargin.description": "Tolerance around the tracking range. An entity removed closer than (range - margin) is treated as destroyed, not as out of range.",
@@ -26,7 +23,6 @@
   "htzdistance.config.reconcileRadius.description": "Max distance between a ghost and a returning real entity to treat them as the same one.",
   "htzdistance.config.learningMode": "Learn ranges automatically",
   "htzdistance.config.learningMode.description": "Measures the real disappearance distance of each type while you play and uses it instead of the values above.",
-
   "htzdistance.config.maxRenderDistance": "Max ghost render distance",
   "htzdistance.config.maxRenderDistance.description": "Ghosts farther than this (blocks) are not drawn.",
   "htzdistance.config.maxGhosts": "Max ghosts",
@@ -44,17 +40,24 @@
   "htzdistance.config.tintColor.description": "Color multiplied over ghosts with the Tinted style.",
   "htzdistance.config.translucentAlpha": "Opacity",
   "htzdistance.config.translucentAlpha.description": "Opacity of ghosts with the Translucent style.",
-
   "htzdistance.config.persistence": "Save ghosts to disk",
   "htzdistance.config.persistence.description": "Keep ghosts between sessions, stored per server and dimension.",
   "htzdistance.config.debugLogging": "Debug logging",
   "htzdistance.config.debugLogging.description": "Log every capture, drop and reconciliation to the game log.",
-
   "htzdistance.config.group.learned": "Learned ranges (this server)",
   "htzdistance.config.group.learned.description": "Ranges measured on the server you are connected to. Used instead of the configured ones when learning mode is on.",
   "htzdistance.config.learned.noServer": "Join a server or world to see its learned ranges.",
   "htzdistance.config.learned.value": "%s blocks (%s removals, %s additions)",
   "htzdistance.config.learned.notEnough": "not enough data (%s removals, %s additions, need %s each)",
   "htzdistance.config.learned.reset": "Forget learned ranges",
-  "htzdistance.config.learned.reset.description": "Deletes the samples learned on this server. Reopen the screen to refresh the values."
+  "htzdistance.config.learned.reset.description": "Deletes the samples learned on this server. Reopen the screen to refresh the values.",
+  "key.categories.htzdistance": "HtzDistance",
+  "key.category.htzdistance.main": "HtzDistance",
+  "key.htzdistance.toggle": "Show/hide ghosts",
+  "htzdistance.message.hidden": "HtzDistance: ghosts hidden",
+  "htzdistance.message.shown": "HtzDistance: ghosts shown",
+  "htzdistance.message.noWorld": "HtzDistance: join a world first",
+  "htzdistance.message.cleared": "HtzDistance: removed %s ghosts in this dimension",
+  "htzdistance.message.clearedRadius": "HtzDistance: removed %s ghosts within %s blocks",
+  "htzdistance.message.clearedAll": "HtzDistance: removed %s ghosts and the saved ghosts of every dimension of this server"
 }
