@@ -62,7 +62,7 @@ public final class GhostRenderer {
         ClientLevel level = minecraft.level;
         GhostStore store = GhostManager.get().store();
         HtzConfig config = ConfigManager.get();
-        if (level == null || store == null || store.size() == 0 || !config.enabled || GhostToggle.isHidden()) {
+        if (level == null || store == null || store.size() == 0 || !config.enabled) {
             // Nothing to draw: stop the culling worker from tracing a stale ghost list.
             CullingWorker.get().clear();
             return result;
@@ -101,6 +101,10 @@ public final class GhostRenderer {
     /** Immediate-mode rendering (1.21.8). */
     public static void render(Camera camera, Frustum frustum, MultiBufferSource buffers, float partialTick) {
         lastFrameRendered = 0;
+        if (GhostToggle.isHidden()) {
+            // Paused: no work at all.
+            return;
+        }
         long startNanos = System.nanoTime();
         List<Ghost> ghosts = visibleGhosts(camera, frustum, partialTick);
         if (ghosts.isEmpty()) {
@@ -142,6 +146,10 @@ public final class GhostRenderer {
      ^/
     public static void extract(Camera camera, Frustum frustum, float partialTick, LevelRenderState levelState) {
         lastFrameRendered = 0;
+        if (GhostToggle.isHidden()) {
+            // Paused: no work at all.
+            return;
+        }
         long startNanos = System.nanoTime();
         List<Ghost> ghosts = visibleGhosts(camera, frustum, partialTick);
         if (ghosts.isEmpty()) {
@@ -162,17 +170,24 @@ public final class GhostRenderer {
                 if (state == null) {
                     state = dispatcher.extractEntity(entity, partialTick);
                     if (config.reuseRenderStates) {
-                        ghost.setCachedRenderState(state, now + STATE_REFRESH_NANOS + (System.identityHashCode(ghost) & 0x1FFFFFFFL) % STATE_REFRESH_NANOS);
+                        ghost.setCachedRenderState(state, ItemStateSnapshot.take(state),
+                                now + STATE_REFRESH_NANOS + (System.identityHashCode(ghost) & 0x1FFFFFFFL) % STATE_REFRESH_NANOS);
                     }
-                } else {
-                    // Items are resolved every frame: some mods rely on it (see ItemStateRefresh).
-                    ItemStateRefresh.refresh(state, entity, partialTick);
+                } else if (!BenchFlags.skipItemRefresh) {
+                    // Some mods clear data from item states after drawing them (see ItemStateSnapshot).
+                    if (!BenchFlags.forceItemResolve && ghost.cachedItemStates() instanceof ItemStateSnapshot items) {
+                        items.restore();
+                    } else {
+                        ItemStateRefresh.refresh(state, entity, partialTick);
+                    }
                 }
                 state.outlineColor = outline;
                 if (outline != 0) {
                     GlowCompat.markGlowing(levelState);
                 }
-                levelState.entityRenderStates.add(state);
+                if (!BenchFlags.skipSubmit) {
+                    levelState.entityRenderStates.add(state);
+                }
                 rendered++;
             } catch (RuntimeException e) {
                 HtzDistanceClient.LOGGER.warn("Could not extract ghost {}", entity.getType(), e);

@@ -30,6 +30,9 @@ public final class Ghost {
      */
     @Nullable
     private Object cachedRenderState;
+    /** Saved item parts of {@link #cachedRenderState}, restored before each reuse (or null). */
+    @Nullable
+    private Object cachedItemStates;
     /** {@link System#nanoTime()} after which {@link #cachedRenderState} must be refreshed. */
     private long cachedRenderStateExpiry;
 
@@ -79,8 +82,14 @@ public final class Ghost {
         return cachedRenderState != null && nowNanos - cachedRenderStateExpiry < 0 ? cachedRenderState : null;
     }
 
-    public void setCachedRenderState(Object state, long expiryNanos) {
+    @Nullable
+    public Object cachedItemStates() {
+        return cachedItemStates;
+    }
+
+    public void setCachedRenderState(Object state, @Nullable Object itemStates, long expiryNanos) {
         this.cachedRenderState = state;
+        this.cachedItemStates = itemStates;
         this.cachedRenderStateExpiry = expiryNanos;
     }
 
