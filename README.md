@@ -25,11 +25,15 @@ cause any packet to be sent to the server.
 - **Persistence** (on by default): holograms are saved per server and dimension in
   `<game dir>/htzdistance/<server>/<dimension>/ghosts.dat`, like Bobby.
 - Limits for max hologram count and max render distance.
+- **Styles**: *Normal*; *Tinted*, as if seen through tinted glass (tint color and tint opacity);
+  *Translucent* (opacity). The **glowing outline** is a separate option with its own color
+  (1.21.10+), usable with any style.
 - **Toggle Mod key** (default `H`, rebindable in Controls): turns the whole mod off and on and
   shows "Htz: Holograms ON/OFF" above the hotbar. Off, it costs nothing at all: no capture, no
   reconciliation, no drawing, and the culling thread sleeps. It is the `enabled` option, so the
   choice is saved and kept after a restart. Holograms stay in memory; when the mod is turned on
   again, holograms whose real entity came back meanwhile are removed.
+- **Open Config key** (default `J`): opens the config screen (needs YACL).
 - **F3 stats**: hologram counts per type, holograms drawn and the average cost per frame and per
   culling pass. From 1.21.10 on it is the `htzdistance:holograms` entry of the debug options
   (F3 + F6), switched on for the F3 screen the first time the mod runs.
@@ -53,18 +57,21 @@ cause any packet to be sent to the server.
 
 ## Supported versions
 
-| Minecraft        | Jar            | Fabric API | Hologram style (tint / translucent)           |
-|------------------|----------------|------------|--------------------------------------------|
-| 1.21.8           | `+1.21.8`      | required   | real tint and real translucency            |
-| 1.21.10          | `+1.21.10`     | required   | glowing outline in the tint color          |
-| 1.21.11          | `+1.21.11`     | required   | glowing outline in the tint color          |
-| 26.1 – 26.1.2    | `+26.1.2`      | required   | glowing outline in the tint color          |
-| 26.2             | `+26.2`        | required   | glowing outline in the tint color          |
-| 26.3             | `+26.3`        | required   | glowing outline in the tint color          |
+| Minecraft        | Jar            | Fabric API | Glowing outline |
+|------------------|----------------|------------|-----------------|
+| 1.21.8           | `+1.21.8`      | required   | no              |
+| 1.21.10          | `+1.21.10`     | required   | yes             |
+| 1.21.11          | `+1.21.11`     | required   | yes             |
+| 26.1 – 26.1.2    | `+26.1.2`      | required   | yes             |
+| 26.2             | `+26.2`        | required   | yes             |
+| 26.3             | `+26.3`        | required   | yes             |
 
 1.21.9 is not supported (its Fabric API has no world render event; 1.21.10 is the hotfix).
 From 1.21.10 on, Minecraft draws entities from deferred render states, so holograms are drawn by
-vanilla together with the real entities and the non-normal styles use the vanilla outline.
+vanilla together with the real entities. The tinted and translucent styles are applied while a
+hologram's state is submitted: model tints are multiplied, render types are swapped for
+translucent ones, and items and the frame block are drawn from their quads so every vertex can
+be recolored (without the enchantment glint). Up to 1.21.8 the same is done in the buffer source.
 
 Optional: [Mod Menu](https://modrinth.com/mod/modmenu) and
 [YACL](https://modrinth.com/mod/yacl) for the config screen.
