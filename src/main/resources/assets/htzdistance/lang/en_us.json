@@ -53,11 +53,16 @@
   "htzdistance.config.learned.reset.description": "Deletes the samples learned on this server. Reopen the screen to refresh the values.",
   "key.categories.htzdistance": "HtzDistance",
   "key.category.htzdistance.main": "HtzDistance",
-  "key.htzdistance.toggle": "Show/hide ghosts",
-  "htzdistance.message.hidden": "HtzDistance: ghosts hidden",
-  "htzdistance.message.shown": "HtzDistance: ghosts shown",
+  "key.htzdistance.toggle": "Pause/resume (hide ghosts)",
+  "htzdistance.message.hidden": "HtzDistance: paused, ghosts hidden",
+  "htzdistance.message.shown": "HtzDistance: resumed, ghosts shown",
   "htzdistance.message.noWorld": "HtzDistance: join a world first",
   "htzdistance.message.cleared": "HtzDistance: removed %s ghosts in this dimension",
   "htzdistance.message.clearedRadius": "HtzDistance: removed %s ghosts within %s blocks",
-  "htzdistance.message.clearedAll": "HtzDistance: removed %s ghosts and the saved ghosts of every dimension of this server"
+  "htzdistance.message.clearedAll": "HtzDistance: removed %s ghosts and the saved ghosts of every dimension of this server",
+  "htzdistance.message.config.header": "HtzDistance config (/htzdistance config <option> <value>):",
+  "htzdistance.message.config.value": "HtzDistance: %s = %s",
+  "htzdistance.message.config.set": "HtzDistance: %s set to %s",
+  "htzdistance.message.config.invalid": "HtzDistance: invalid value for %s",
+  "htzdistance.message.config.reset": "HtzDistance: config reset to the defaults"
 }

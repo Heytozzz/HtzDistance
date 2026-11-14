@@ -24,7 +24,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
  * Client-side {@code /htzdistance} command:
  * <ul>
  *     <li>{@code /htzdistance} or {@code stats}: ghost counts and costs</li>
- *     <li>{@code toggle}: hide or show all ghosts</li>
+ *     <li>{@code toggle}: pause the mod (ghosts hidden, no work at all) or resume it</li>
+ *     <li>{@code config ...}: read and change the config (see {@link ConfigCommand})</li>
  *     <li>{@code clear}: forget the ghosts of the current dimension</li>
  *     <li>{@code clear <radius>}: forget the ghosts within that many blocks</li>
  *     <li>{@code clear all}: forget the ghosts of every dimension of this server, saved files included</li>
@@ -43,6 +44,7 @@ public final class HtzCommands {
                 .executes(HtzCommands::stats)
                 .then(literal("stats").executes(HtzCommands::stats))
                 .then(literal("toggle").executes(HtzCommands::toggle))
+                .then(ConfigCommand.build())
                 .then(literal("clear")
                         .executes(context -> clear(context, -1.0))
                         .then(literal("all").executes(HtzCommands::clearAll))

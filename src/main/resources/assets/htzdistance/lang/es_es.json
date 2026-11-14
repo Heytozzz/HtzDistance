@@ -53,11 +53,16 @@
   "htzdistance.config.learned.reset.description": "Borra las muestras aprendidas en este servidor. Vuelve a abrir la pantalla para ver los valores actualizados.",
   "key.categories.htzdistance": "HtzDistance",
   "key.category.htzdistance.main": "HtzDistance",
-  "key.htzdistance.toggle": "Mostrar/ocultar fantasmas",
-  "htzdistance.message.hidden": "HtzDistance: fantasmas ocultos",
-  "htzdistance.message.shown": "HtzDistance: fantasmas visibles",
+  "key.htzdistance.toggle": "Pausar/reanudar (ocultar fantasmas)",
+  "htzdistance.message.hidden": "HtzDistance: en pausa, fantasmas ocultos",
+  "htzdistance.message.shown": "HtzDistance: reanudado, fantasmas visibles",
   "htzdistance.message.noWorld": "HtzDistance: primero entra en un mundo",
   "htzdistance.message.cleared": "HtzDistance: eliminados %s fantasmas de esta dimensión",
   "htzdistance.message.clearedRadius": "HtzDistance: eliminados %s fantasmas a menos de %s bloques",
-  "htzdistance.message.clearedAll": "HtzDistance: eliminados %s fantasmas y los fantasmas guardados de todas las dimensiones de este servidor"
+  "htzdistance.message.clearedAll": "HtzDistance: eliminados %s fantasmas y los fantasmas guardados de todas las dimensiones de este servidor",
+  "htzdistance.message.config.header": "Configuración de HtzDistance (/htzdistance config <opción> <valor>):",
+  "htzdistance.message.config.value": "HtzDistance: %s = %s",
+  "htzdistance.message.config.set": "HtzDistance: %s cambiado a %s",
+  "htzdistance.message.config.invalid": "HtzDistance: valor no válido para %s",
+  "htzdistance.message.config.reset": "HtzDistance: configuración restablecida a los valores por defecto"
 }
