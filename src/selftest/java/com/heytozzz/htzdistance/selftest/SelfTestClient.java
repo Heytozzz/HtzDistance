@@ -24,7 +24,13 @@ public final class SelfTestClient implements ClientModInitializer {
             return;
         }
         LOGGER.info("Self-test trigger found, the self-test will run once the title screen is shown");
-        SelfTestRun run = new SelfTestRun(FabricLoader.getInstance().getGameDir());
+        String mode;
+        try {
+            mode = Files.readString(trigger).trim().toLowerCase(java.util.Locale.ROOT);
+        } catch (java.io.IOException e) {
+            mode = "";
+        }
+        SelfTestRun run = new SelfTestRun(FabricLoader.getInstance().getGameDir(), mode);
         ClientTickEvents.END_CLIENT_TICK.register(run::tick);
     }
 }

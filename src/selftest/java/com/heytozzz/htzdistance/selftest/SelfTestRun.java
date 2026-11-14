@@ -114,6 +114,7 @@ final class SelfTestRun {
     private int savedFramerate;
     private boolean savedVsync;
     private int savedFov;
+    private net.minecraft.client.InactivityFpsLimit savedInactivity;
     private double savedEntityDistance;
 
     /** Real entities' rendered yaw / frame state, keyed by rounded position. */
@@ -125,9 +126,13 @@ final class SelfTestRun {
         boolean run(Minecraft minecraft) throws Exception;
     }
 
-    SelfTestRun(Path gameDir) {
+    SelfTestRun(Path gameDir, String mode) {
         this.gameDir = gameDir;
-        buildScript();
+        if (mode.contains("bench")) {
+            buildBenchScript();
+        } else {
+            buildScript();
+        }
     }
 
     void tick(Minecraft minecraft) {
@@ -174,6 +179,11 @@ final class SelfTestRun {
             savedFramerate = mc.options.framerateLimit().get();
             savedVsync = mc.options.enableVsync().get();
             savedFov = mc.options.fov().get();
+        savedInactivity = mc.options.inactivityFpsLimit().get();
+        // Vanilla drops to 30 FPS after a while without input ("AFK"); keep full speed.
+        mc.options.inactivityFpsLimit().set(net.minecraft.client.InactivityFpsLimit.MINIMIZED);
+            savedInactivity = mc.options.inactivityFpsLimit().get();
+            mc.options.inactivityFpsLimit().set(net.minecraft.client.InactivityFpsLimit.MINIMIZED);
             savedEntityDistance = mc.options.entityDistanceScaling().get();
             mc.options.entityDistanceScaling().set(1.0);
             mc.options.renderDistance().set(12);
@@ -181,6 +191,7 @@ final class SelfTestRun {
             mc.options.enableVsync().set(false);
 
             HtzConfig config = new HtzConfig();
+            config.persistence = false;
             config.maxGhosts = 8192;
             config.maxRenderDistance = 160.0;
             ConfigManager.apply(config);
@@ -307,6 +318,139 @@ final class SelfTestRun {
             finish(mc);
             return true;
         });
+    }
+
+    // ------------------------------------------------------------------ bench
+
+    /** Bench wall size: 35 x 4 = 140 frames. */
+    private static final int BENCH_COLUMNS = 35;
+    private static final int BENCH_ROWS = 4;
+
+    /**
+     * Focused frame-time benchmark: one wall of 140 item frames with random items, 30 blocks in
+     * front of the player, measured as real entities, as ghosts (several variants) and hidden.
+     */
+    private void buildBenchScript() {
+        steps.add(mc -> {
+            saveOptions(mc);
+            HtzConfig config = new HtzConfig();
+            // Ghosts saved by an earlier run would be loaded into the fresh world.
+            config.persistence = false;
+            ConfigManager.apply(config);
+            SelfTestState.serverLikeRanges = false;
+            deleteWorldFolder();
+            createWorld(mc);
+            return true;
+        });
+        steps.add(waitUntil(mc -> mc.level != null && mc.player != null && mc.getSingleplayerServer() != null, 1200));
+        steps.add(waitTicks(100));
+        steps.add(this::buildBenchScene);
+        steps.add(waitTicks(60));
+        steps.add(benchView());
+        steps.add(waitTicks(100));
+        steps.add(mc -> {
+            int frames = countReal(mc, null);
+            line("");
+            line(String.format(Locale.ROOT, "Bench wall: %d frames spawned, client sees %d", expectedFrames, frames));
+            check(frames == expectedFrames, "all bench frames reach the client");
+            return true;
+        });
+        steps.addAll(measure("Bench: real frames"));
+        steps.add(screenshot("bench-real"));
+
+        steps.add(mc -> {
+            SelfTestState.serverLikeRanges = true;
+            command(mc, "execute as @a at @s run tp @s ~ ~ ~-20");
+            return true;
+        });
+        steps.add(waitTicks(60));
+        steps.add(benchView());
+        steps.add(waitTicks(100));
+        steps.add(mc -> {
+            check(ghostCount() == expectedFrames && countReal(mc, null) == 0,
+                    "every bench frame became a ghost (" + ghostCount() + "/" + expectedFrames + ")");
+            return true;
+        });
+        steps.addAll(measure("Bench: ghosts"));
+        steps.add(screenshot("bench-ghosts"));
+        for (String variant : BenchVariants.NAMES) {
+            steps.add(mc -> {
+                BenchVariants.apply(variant, true);
+                return true;
+            });
+            steps.add(waitTicks(40));
+            steps.addAll(measure("Bench: ghosts, " + variant));
+            steps.add(screenshot("bench-" + variant.replace(' ', '-')));
+            steps.add(mc -> {
+                BenchVariants.apply(variant, false);
+                return true;
+            });
+        }
+        steps.add(mc -> {
+            com.heytozzz.htzdistance.tools.GhostToggle.setHidden(true);
+            return true;
+        });
+        steps.add(waitTicks(40));
+        steps.addAll(measure("Bench: ghosts hidden"));
+        steps.add(mc -> {
+            com.heytozzz.htzdistance.tools.GhostToggle.setHidden(false);
+            finish(mc);
+            return true;
+        });
+    }
+
+    private boolean buildBenchScene(Minecraft mc) {
+        MinecraftServer server = mc.getSingleplayerServer();
+        server.execute(() -> {
+            ServerLevel level = server.overworld();
+            BlockPos player = server.getPlayerList().getPlayers().getFirst().blockPosition();
+            BlockPos surface = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, player);
+            bx = surface.getX();
+            y = surface.getY();
+            bz = surface.getZ();
+            run(server, "gamerule doDaylightCycle false");
+            run(server, "gamerule advance_time false");
+            run(server, "time set noon");
+            run(server, "weather clear");
+            run(server, "gamerule doMobSpawning false");
+            run(server, "gamerule spawn_mobs false");
+            int wz = bz + 30;
+            run(server, String.format(Locale.ROOT, "fill %d %d %d %d %d %d oak_planks",
+                    bx - BENCH_COLUMNS / 2, y + 1, wz, bx + BENCH_COLUMNS / 2, y + BENCH_ROWS, wz));
+            Random random = new Random(7);
+            int frames = 0;
+            for (int cx = 0; cx < BENCH_COLUMNS; cx++) {
+                for (int cy = 0; cy < BENCH_ROWS; cy++) {
+                    BlockPos pos = new BlockPos(bx - BENCH_COLUMNS / 2 + cx, y + 1 + cy, wz - 1);
+                    spawnFrame(level, pos, Direction.NORTH, item(ITEMS[random.nextInt(ITEMS.length)]), random.nextInt(8), false);
+                    frames++;
+                }
+            }
+            expectedFrames = frames;
+        });
+        return true;
+    }
+
+    /** 30 blocks in front of the wall, looking at it. */
+    private Step benchView() {
+        return mc -> {
+            closeScreen(mc);
+            command(mc, String.format(Locale.ROOT, "tp @p %d.5 %d %d.5 0 5", bx, y + 2, bz));
+            mc.options.fov().set(70);
+            return true;
+        };
+    }
+
+    private void saveOptions(Minecraft mc) {
+        savedRenderDistance = mc.options.renderDistance().get();
+        savedFramerate = mc.options.framerateLimit().get();
+        savedVsync = mc.options.enableVsync().get();
+        savedFov = mc.options.fov().get();
+        savedEntityDistance = mc.options.entityDistanceScaling().get();
+        mc.options.entityDistanceScaling().set(1.0);
+        mc.options.renderDistance().set(12);
+        mc.options.framerateLimit().set(260);
+        mc.options.enableVsync().set(false);
     }
 
     private Step waitTicks(int ticks) {
@@ -653,6 +797,7 @@ final class SelfTestRun {
         int[] fpsMin = {Integer.MAX_VALUE};
         int[] samples = {0};
         int[] ticks = {0};
+        long[] frameTime = {0, 0, 0};
         List<Step> list = new ArrayList<>();
         list.add(mc -> {
             closeScreen(mc);
@@ -665,6 +810,10 @@ final class SelfTestRun {
         });
         list.add(mc -> {
             ticks[0]++;
+            long ft = mc.getFrameTimeNs();
+            frameTime[0] += ft;
+            frameTime[1]++;
+            frameTime[2] = Math.max(frameTime[2], ft);
             if (ticks[0] % 20 == 0) {
                 int fps = mc.getFps();
                 fpsSum[0] += fps;
@@ -683,6 +832,8 @@ final class SelfTestRun {
             line("## " + name);
             line(String.format(Locale.ROOT, "  FPS avg %d, min %d (window active: %s)",
                     samples[0] == 0 ? 0 : fpsSum[0] / samples[0], fpsMin[0] == Integer.MAX_VALUE ? 0 : fpsMin[0], mc.isWindowActive()));
+            line(String.format(Locale.ROOT, "  frame time (render work, without limiter wait): avg %.3f ms, max %.3f ms",
+                    frameTime[1] == 0 ? 0 : frameTime[0] / 1e6 / frameTime[1], frameTime[2] / 1e6));
             line(String.format(Locale.ROOT, "  ghosts stored %d, drawn last frame %d", ghostCount(), GhostRenderer.lastFrameRendered()));
             line(String.format(Locale.ROOT, "  ghost selection+render cost: %.3f ms/frame over %d frames", renderMs, frames));
             line(String.format(Locale.ROOT, "  culling pass (worker thread): %.3f ms over %d passes in %.1f s", cullMs, passes, seconds));
@@ -752,6 +903,9 @@ final class SelfTestRun {
         mc.options.framerateLimit().set(savedFramerate);
         mc.options.enableVsync().set(savedVsync);
         mc.options.fov().set(savedFov);
+        if (savedInactivity != null) {
+            mc.options.inactivityFpsLimit().set(savedInactivity);
+        }
         mc.options.entityDistanceScaling().set(savedEntityDistance);
         SelfTestState.serverLikeRanges = false;
         mc.stop();
