@@ -41,3 +41,6 @@ replay_*.log
 
 # stonecutter
 .stonecutter/
+
+# Recorded GIFs (large, see scripts/make_gifs.py)
+docs/gifs/

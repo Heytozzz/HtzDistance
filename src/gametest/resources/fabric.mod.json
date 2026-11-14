@@ -10,7 +10,8 @@
       "com.heytozzz.htzdistance.test.GhostLifecycleClientTest",
       "com.heytozzz.htzdistance.test.PersistenceClientTest",
       "com.heytozzz.htzdistance.test.LearningClientTest",
-      "com.heytozzz.htzdistance.test.ToolsClientTest"
+      "com.heytozzz.htzdistance.test.ToolsClientTest",
+      "com.heytozzz.htzdistance.test.RecordingClientTest"
     ]
   },
   "mixins": [
