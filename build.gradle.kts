@@ -137,13 +137,18 @@ tasks {
         filesMatching("fabric.mod.json") { expand(props) }
 
         val mixinJava = "JAVA_${requiredJava.majorVersion}"
-        // Client mixins differ per version: the buffer-source styling and render type accessors
-        // only exist for the immediate renderer (up to 1.21.8).
+        // Client mixins differ per version: the buffer-source styling only exists for the
+        // immediate renderer (up to 1.21.8), the submit styling for render states (1.21.10+), and
+        // the render type accessors for the composite render types (up to 1.21.10).
         val clientMixins = buildList {
             add("ClientPacketListenerMixin")
             if (sc.current.parsed < "1.21.10") {
                 add("DebugScreenOverlayMixin")
                 add("render.BufferSourceMixin")
+            } else {
+                add("render.EntityRenderDispatcherMixin")
+            }
+            if (sc.current.parsed < "1.21.11") {
                 add("render.CompositeRenderTypeAccessor")
                 add("render.CompositeStateAccessor")
                 add("render.EmptyTextureStateShardInvoker")

@@ -141,11 +141,13 @@ public final class GhostRenderer {
 
     //? if >=1.21.10 {
     /*/^*
-     * Adds the ghosts' render states to the frame being extracted. With a non-normal style, the
-     * ghosts get a glowing outline in the tint color (render states cannot be tinted directly).
+     * Adds the ghosts' render states to the frame being extracted. The style is applied when they
+     * are submitted (see {@link HologramSubmits}); the optional glowing outline uses the vanilla
+     * outline color of the state.
      ^/
     public static void extract(Camera camera, Frustum frustum, float partialTick, LevelRenderState levelState) {
         lastFrameRendered = 0;
+        HologramSubmits.beginFrame(GhostToggle.isHidden() ? GhostStyleColor.NONE : GhostStyleColor.from(ConfigManager.get()));
         if (GhostToggle.isHidden()) {
             // Paused: no work at all.
             return;
@@ -156,7 +158,7 @@ public final class GhostRenderer {
             return;
         }
         HtzConfig config = ConfigManager.get();
-        int outline = config.hologramStyle == HtzConfig.GhostStyle.NORMAL ? 0 : 0xFF000000 | config.tintColor;
+        int outline = config.glowing ? 0xFF000000 | config.glowColor : 0;
         EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         long now = System.nanoTime();
         int rendered = 0;
@@ -185,6 +187,7 @@ public final class GhostRenderer {
                 if (outline != 0) {
                     GlowCompat.markGlowing(levelState);
                 }
+                HologramSubmits.add(state);
                 if (!BenchFlags.skipSubmit) {
                     levelState.entityRenderStates.add(state);
                 }
