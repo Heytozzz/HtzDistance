@@ -8,6 +8,7 @@ import com.heytozzz.htzdistance.ghost.GhostStore;
 import com.heytozzz.htzdistance.persist.GhostPersistence;
 import com.heytozzz.htzdistance.render.RenderHook;
 import com.heytozzz.htzdistance.tools.DebugOverlay;
+import com.heytozzz.htzdistance.tools.ConfigKey;
 import com.heytozzz.htzdistance.tools.GhostToggle;
 import com.heytozzz.htzdistance.tools.HtzCommands;
 import net.fabricmc.api.ClientModInitializer;
@@ -38,6 +39,7 @@ public final class HtzDistanceClient implements ClientModInitializer {
         new GhostPersistence().register();
         RenderHook.register();
         GhostToggle.register();
+        ConfigKey.register();
         HtzCommands.register();
         DebugOverlay.register();
         CullingWorker.get().start();

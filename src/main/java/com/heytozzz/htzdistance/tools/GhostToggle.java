@@ -35,14 +35,25 @@ public final class GhostToggle {
     private GhostToggle() {
     }
 
+    //? if >=1.21.10 {
+    /*private static KeyMapping.Category category;
+
+    /^* The mod's key category in Controls (registered once). ^/
+    static KeyMapping.Category category() {
+        if (category == null) {
+            category = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(HtzDistanceClient.MOD_ID, "main"));
+        }
+        return category;
+    }
+    *///?} else {
+    /** The mod's key category in Controls. */
+    static String category() {
+        return "key.categories.htzdistance";
+    }
+    //?}
+
     public static void register() {
-        //? if >=1.21.10 {
-        /*KeyMapping.Category category = KeyMapping.Category.register(
-                ResourceLocation.fromNamespaceAndPath(HtzDistanceClient.MOD_ID, "main"));
-        *///?} else {
-        String category = "key.categories.htzdistance";
-        //?}
-        KeyMapping mapping = new KeyMapping("key.htzdistance.toggle", InputConstants.KEY_H, category);
+        KeyMapping mapping = new KeyMapping("key.htzdistance.toggle", InputConstants.KEY_H, category());
         //? if >=26.1 {
         /*key = KeyMappingHelper.registerKeyMapping(mapping);
         *///?} else {
