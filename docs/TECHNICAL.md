@@ -1,4 +1,4 @@
-# HtzDistance
+# HtzDistance: technical details
 
 Client-only Fabric mod that keeps showing **armor stands**, **item frames**, **glow item
 frames** and **paintings** after the server stops sending them because you walked out of its entity tracking
@@ -149,4 +149,4 @@ number of holograms drawn in that scene.
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Bundles LogisticsCraft OcclusionCulling (MIT).
+MIT, see [LICENSE](../LICENSE). Bundles LogisticsCraft OcclusionCulling (MIT).
