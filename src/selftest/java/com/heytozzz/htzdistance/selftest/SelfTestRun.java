@@ -192,7 +192,7 @@ final class SelfTestRun {
 
             HtzConfig config = new HtzConfig();
             config.persistence = false;
-            config.maxGhosts = 8192;
+            config.maxHolograms = 8192;
             config.maxRenderDistance = 160.0;
             ConfigManager.apply(config);
             SelfTestState.serverLikeRanges = false;

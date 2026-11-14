@@ -3,7 +3,7 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "Keeps rendering armor stands, item frames and paintings as non-interactive ghosts after the server stops tracking them.",
+  "description": "Keeps rendering armor stands, item frames and paintings as non-interactive holograms after the server stops tracking them.",
   "authors": [
     "Heytozzz"
   ],

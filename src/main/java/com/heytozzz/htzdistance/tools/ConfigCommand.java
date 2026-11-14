@@ -43,7 +43,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
  */
 final class ConfigCommand {
     /** Internal bookkeeping fields that are not user options. */
-    private static final List<String> HIDDEN = List.of("debugEntryEnabledOnce");
+    private static final List<String> HIDDEN = List.of("hologramsDebugEntryEnabled");
     private static final String TINT = "tintColor";
 
     /** One option: the field path from {@link HtzConfig} to the value. */
@@ -168,7 +168,7 @@ final class ConfigCommand {
 
     private static int reset(CommandContext<FabricClientCommandSource> context) {
         HtzConfig defaults = new HtzConfig();
-        defaults.debugEntryEnabledOnce = ConfigManager.get().debugEntryEnabledOnce;
+        defaults.hologramsDebugEntryEnabled = ConfigManager.get().hologramsDebugEntryEnabled;
         ConfigManager.apply(defaults);
         context.getSource().sendFeedback(Component.translatable("htzdistance.message.config.reset"));
         return Command.SINGLE_SUCCESS;

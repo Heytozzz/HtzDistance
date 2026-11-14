@@ -74,13 +74,13 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-02-ghosts-normal");
 
-            TestSupport.updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.TINT);
+            TestSupport.updateConfig(context, config -> config.hologramStyle = HtzConfig.GhostStyle.TINT);
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-03-ghosts-tint");
-            TestSupport.updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.TRANSLUCENT);
+            TestSupport.updateConfig(context, config -> config.hologramStyle = HtzConfig.GhostStyle.TRANSLUCENT);
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-04-ghosts-translucent");
-            TestSupport.updateConfig(context, config -> config.ghostStyle = HtzConfig.GhostStyle.NORMAL);
+            TestSupport.updateConfig(context, config -> config.hologramStyle = HtzConfig.GhostStyle.NORMAL);
 
             // Occlusion culling: a wall between the player and the ghosts hides them.
             String wall = String.format(Locale.ROOT, "fill %d %d %d %d %d %d", x - 8, y, z - 6, x + 8, y + 5, z - 6);

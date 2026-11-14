@@ -1,5 +1,6 @@
 package com.heytozzz.htzdistance.config;
 
+import com.google.gson.annotations.SerializedName;
 import com.heytozzz.htzdistance.ghost.GhostKind;
 
 /**
@@ -34,7 +35,7 @@ public final class HtzConfig {
         TRANSLUCENT
     }
 
-    /** Master switch. */
+    /** Master switch (also the pause key). Off: the mod does no work at all, holograms are kept. */
     public boolean enabled = true;
 
     public KindSettings armorStand = new KindSettings(GhostKind.ARMOR_STAND.defaultThreshold());
@@ -53,7 +54,8 @@ public final class HtzConfig {
     public double maxRenderDistance = 96.0;
 
     /** Max number of ghosts kept per dimension. The farthest ones are dropped first. */
-    public int maxGhosts = 1024;
+    @SerializedName(value = "maxHolograms", alternate = "maxGhosts")
+    public int maxHolograms = 1024;
 
     /**
      * Seconds the player may stay inside the real tracking range of a ghost without the real
@@ -70,12 +72,13 @@ public final class HtzConfig {
     /** Skip rendering ghosts hidden behind blocks (asynchronous ray tracing). */
     public boolean occlusionCulling = true;
 
-    public GhostStyle ghostStyle = GhostStyle.NORMAL;
+    @SerializedName(value = "hologramStyle", alternate = "ghostStyle")
+    public GhostStyle hologramStyle = GhostStyle.NORMAL;
 
-    /** Tint color as 0xRRGGBB, used when {@link #ghostStyle} is {@link GhostStyle#TINT}. */
+    /** Tint color as 0xRRGGBB, used when {@link #hologramStyle} is {@link GhostStyle#TINT}. */
     public int tintColor = 0xA0C8FF;
 
-    /** Opacity in [0.1, 1], used when {@link #ghostStyle} is {@link GhostStyle#TRANSLUCENT}. */
+    /** Opacity in [0.1, 1], used when {@link #hologramStyle} is {@link GhostStyle#TRANSLUCENT}. */
     public float translucentAlpha = 0.6f;
 
     /**
@@ -91,7 +94,7 @@ public final class HtzConfig {
      * Set once the mod has switched its F3 entry on (Minecraft 1.21.10+). Kept so that a player
      * who turns the entry off later is not overridden.
      */
-    public boolean debugEntryEnabledOnce = false;
+    public boolean hologramsDebugEntryEnabled = false;
 
     /** Log every capture, drop and reconciliation decision. */
     public boolean debugLogging = false;
@@ -131,30 +134,30 @@ public final class HtzConfig {
 
         double margin = clamp(thresholdMargin, 0.0, 16.0, 1.5);
         double renderDistance = clamp(maxRenderDistance, 8.0, 1024.0, 96.0);
-        int ghosts = maxGhosts <= 0 ? 1024 : Math.min(100_000, maxGhosts);
+        int ghosts = maxHolograms <= 0 ? 1024 : Math.min(100_000, maxHolograms);
         double timeout = clamp(inRangeTimeoutSeconds, 0.5, 600.0, 5.0);
         double radius = clamp(reconcileRadius, 0.05, 4.0, 0.5);
         float alpha = (float) clamp(translucentAlpha, 0.1, 1.0, 0.6);
         int tint = tintColor & 0xFFFFFF;
-        GhostStyle style = ghostStyle == null ? GhostStyle.NORMAL : ghostStyle;
+        GhostStyle style = hologramStyle == null ? GhostStyle.NORMAL : hologramStyle;
 
         changed |= margin != thresholdMargin
                 || renderDistance != maxRenderDistance
-                || ghosts != maxGhosts
+                || ghosts != maxHolograms
                 || timeout != inRangeTimeoutSeconds
                 || radius != reconcileRadius
                 || alpha != translucentAlpha
                 || tint != tintColor
-                || style != ghostStyle;
+                || style != hologramStyle;
 
         thresholdMargin = margin;
         maxRenderDistance = renderDistance;
-        maxGhosts = ghosts;
+        maxHolograms = ghosts;
         inRangeTimeoutSeconds = timeout;
         reconcileRadius = radius;
         translucentAlpha = alpha;
         tintColor = tint;
-        ghostStyle = style;
+        hologramStyle = style;
         return changed;
     }
 

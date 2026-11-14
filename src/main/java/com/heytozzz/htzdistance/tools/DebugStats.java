@@ -43,15 +43,13 @@ public final class DebugStats {
         int total = store == null ? 0 : store.size();
 
         String state;
-        if (!ConfigManager.get().enabled) {
-            state = " [disabled]";
-        } else if (GhostToggle.isHidden()) {
-            state = " [hidden]";
+        if (GhostToggle.isHidden()) {
+            state = " [off]";
         } else {
             state = "";
         }
         lines.add(String.format(Locale.ROOT,
-                "HtzDistance: %d ghosts (stands %d, frames %d, glow frames %d, paintings %d), drawn %d%s",
+                "HtzDistance: %d holograms (stands %d, frames %d, glow frames %d, paintings %d), drawn %d%s",
                 total,
                 counts[GhostKind.ARMOR_STAND.ordinal()],
                 counts[GhostKind.ITEM_FRAME.ordinal()],

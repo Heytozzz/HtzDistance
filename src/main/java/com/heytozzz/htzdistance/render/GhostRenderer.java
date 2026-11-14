@@ -156,7 +156,7 @@ public final class GhostRenderer {
             return;
         }
         HtzConfig config = ConfigManager.get();
-        int outline = config.ghostStyle == HtzConfig.GhostStyle.NORMAL ? 0 : 0xFF000000 | config.tintColor;
+        int outline = config.hologramStyle == HtzConfig.GhostStyle.NORMAL ? 0 : 0xFF000000 | config.tintColor;
         EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         long now = System.nanoTime();
         int rendered = 0;

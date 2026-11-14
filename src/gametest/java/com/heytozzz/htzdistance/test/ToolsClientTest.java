@@ -74,7 +74,7 @@ public final class ToolsClientTest implements FabricClientGameTest {
             // F3 lines.
             List<String> lines = context.computeOnClient(client -> DebugStats.lines());
             HtzDistanceClient.LOGGER.info("[gametest] F3 lines: {}", lines);
-            check(lines.size() == 2 && lines.get(0).contains("3 ghosts") && lines.get(0).contains("drawn 3"),
+            check(lines.size() == 2 && lines.get(0).contains("3 holograms") && lines.get(0).contains("drawn 3"),
                     "F3 line shows the ghost counts");
             //? if >=1.21.10 {
             /*check(context.computeOnClient(client -> DebugScreenEntries.getEntry(DebugOverlay.ENTRY_ID) != null),
@@ -92,6 +92,13 @@ public final class ToolsClientTest implements FabricClientGameTest {
             context.getInput().pressKey(GhostToggle.key());
             context.waitTicks(3);
             check(context.computeOnClient(client -> GhostToggle.isHidden()), "key pauses the mod");
+            // The state is saved: reading the config file again keeps the mod off.
+            check(context.computeOnClient(client -> {
+                ConfigManager.load();
+                return GhostToggle.isHidden() && !ConfigManager.get().enabled;
+            }), "pause survives reloading the config file");
+            check(context.computeOnClient(client -> GhostToggle.stateMessage().getString()).equals("Htz: Holograms OFF"),
+                    "action bar message");
             check(rendered(context) == 0, "hidden ghosts are not drawn");
             assertGhosts(context, 3, "hidden ghosts are kept");
             context.takeScreenshot("htzdistance-tools-02-hidden");
@@ -122,8 +129,8 @@ public final class ToolsClientTest implements FabricClientGameTest {
             check(context.computeOnClient(client -> ConfigManager.get().itemFrame.threshold) == 9.5, "config: per-type option");
             command(context, "htzdistance config occlusionCulling false");
             check(!context.computeOnClient(client -> ConfigManager.get().occlusionCulling), "config: boolean option");
-            command(context, "htzdistance config ghostStyle tint");
-            check(context.computeOnClient(client -> ConfigManager.get().ghostStyle) == HtzConfig.GhostStyle.TINT, "config: enum option");
+            command(context, "htzdistance config hologramStyle tint");
+            check(context.computeOnClient(client -> ConfigManager.get().hologramStyle) == HtzConfig.GhostStyle.TINT, "config: enum option");
             command(context, "htzdistance config tintColor #FF8000");
             check(context.computeOnClient(client -> ConfigManager.get().tintColor) == 0xFF8000, "config: color option");
             command(context, "htzdistance config translucentAlpha 0.5");
@@ -136,7 +143,7 @@ public final class ToolsClientTest implements FabricClientGameTest {
                 HtzConfig defaults = new HtzConfig();
                 return config.maxRenderDistance == defaults.maxRenderDistance && config.occlusionCulling
                         && config.itemFrame.threshold == defaults.itemFrame.threshold
-                        && config.ghostStyle == HtzConfig.GhostStyle.NORMAL;
+                        && config.hologramStyle == HtzConfig.GhostStyle.NORMAL;
             }), "config: reset to defaults");
 
             // Toggle command.

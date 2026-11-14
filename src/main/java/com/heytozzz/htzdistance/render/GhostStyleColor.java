@@ -15,7 +15,7 @@ public record GhostStyleColor(int red, int green, int blue, int alpha, boolean t
     public static final GhostStyleColor NONE = new GhostStyleColor(255, 255, 255, 255, false);
 
     public static GhostStyleColor from(HtzConfig config) {
-        return switch (config.ghostStyle) {
+        return switch (config.hologramStyle) {
             case NORMAL -> NONE;
             case TINT -> new GhostStyleColor(
                     (config.tintColor >> 16) & 0xFF,

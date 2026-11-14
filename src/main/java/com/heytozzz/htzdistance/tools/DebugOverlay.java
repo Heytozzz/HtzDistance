@@ -25,7 +25,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
  */
 public final class DebugOverlay {
     //? if >=1.21.10 {
-    /*public static final ResourceLocation ENTRY_ID = ResourceLocation.fromNamespaceAndPath(HtzDistanceClient.MOD_ID, "ghosts");
+    /*public static final ResourceLocation ENTRY_ID = ResourceLocation.fromNamespaceAndPath(HtzDistanceClient.MOD_ID, "holograms");
     *///?}
 
     private DebugOverlay() {
@@ -48,7 +48,7 @@ public final class DebugOverlay {
     /^* Switches the entry on for the F3 screen the first time the mod runs. ^/
     private static void enableOnce(Minecraft minecraft) {
         HtzConfig config = ConfigManager.get();
-        if (config.debugEntryEnabledOnce || minecraft.debugEntries == null) {
+        if (config.hologramsDebugEntryEnabled || minecraft.debugEntries == null) {
             return;
         }
         if (minecraft.debugEntries.getStatus(ENTRY_ID) == DebugScreenEntryStatus.NEVER) {
@@ -56,7 +56,7 @@ public final class DebugOverlay {
             minecraft.debugEntries.save();
         }
         HtzConfig copy = ConfigManager.copy();
-        copy.debugEntryEnabledOnce = true;
+        copy.hologramsDebugEntryEnabled = true;
         ConfigManager.apply(copy);
         HtzDistanceClient.debug("Enabled the F3 entry {}", ENTRY_ID);
     }
