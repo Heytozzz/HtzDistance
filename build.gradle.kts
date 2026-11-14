@@ -67,45 +67,51 @@ loom {
     }
 }
 
-// Self-test mod (src/selftest): a separate jar dropped into a real launcher instance to measure
-// performance and check ghost rotations with the player's own mod list. Never part of the release
-// jar, and it does nothing unless a trigger file exists in the game directory.
-val selftest: SourceSet = sourceSets.create("selftest") {
-    compileClasspath += sourceSets["main"].compileClasspath + sourceSets["main"].output
-    runtimeClasspath += sourceSets["main"].runtimeClasspath + sourceSets["main"].output
-}
-val selftestDevJar = tasks.register<Jar>("selftestDevJar") {
-    from(selftest.output)
-    archiveBaseName = "htzdistance-selftest"
-    archiveVersion = sc.current.version
-    archiveClassifier = "dev"
-    destinationDirectory = layout.buildDirectory.dir("devlibs")
-}
-if (sc.current.parsed < "26.1") {
-    // Obfuscated versions: remap the jar (and its mixin) to intermediary like the main jar.
-    tasks.register<net.fabricmc.loom.task.RemapJarTask>("selftestJar") {
-        inputFile = selftestDevJar.flatMap { it.archiveFile }
+// Local-only test tooling (src/selftest, src/gametest) is kept out of the public repository; the
+// build only wires it up when those directories exist.
+if (rootProject.file("src/selftest").isDirectory) {
+    // Self-test mod (src/selftest): a separate jar dropped into a real launcher instance to measure
+    // performance and check ghost rotations with the player's own mod list. Never part of the release
+    // jar, and it does nothing unless a trigger file exists in the game directory.
+    val selftest: SourceSet = sourceSets.create("selftest") {
+        compileClasspath += sourceSets["main"].compileClasspath + sourceSets["main"].output
+        runtimeClasspath += sourceSets["main"].runtimeClasspath + sourceSets["main"].output
+    }
+    val selftestDevJar = tasks.register<Jar>("selftestDevJar") {
+        from(selftest.output)
         archiveBaseName = "htzdistance-selftest"
         archiveVersion = sc.current.version
-        destinationDirectory = layout.buildDirectory.dir("libs")
+        archiveClassifier = "dev"
+        destinationDirectory = layout.buildDirectory.dir("devlibs")
     }
-} else {
-    val selftestName = "htzdistance-selftest-${sc.current.version}.jar"
-    tasks.register<Copy>("selftestJar") {
-        from(selftestDevJar.flatMap { it.archiveFile })
-        into(layout.buildDirectory.dir("libs"))
-        rename { selftestName }
+    if (sc.current.parsed < "26.1") {
+        // Obfuscated versions: remap the jar (and its mixin) to intermediary like the main jar.
+        tasks.register<net.fabricmc.loom.task.RemapJarTask>("selftestJar") {
+            inputFile = selftestDevJar.flatMap { it.archiveFile }
+            archiveBaseName = "htzdistance-selftest"
+            archiveVersion = sc.current.version
+            destinationDirectory = layout.buildDirectory.dir("libs")
+        }
+    } else {
+        val selftestName = "htzdistance-selftest-${sc.current.version}.jar"
+        tasks.register<Copy>("selftestJar") {
+            from(selftestDevJar.flatMap { it.archiveFile })
+            into(layout.buildDirectory.dir("libs"))
+            rename { selftestName }
+        }
     }
 }
 
-// Automated in-game tests (src/gametest): singleplayer worlds driven by Fabric's client game test API.
-fabricApi {
-    configureTests {
-        createSourceSet = true
-        modId = "htzdistance-gametest"
-        enableGameTests = false
-        enableClientGameTests = true
-        eula = false
+if (rootProject.file("src/gametest").isDirectory) {
+    // Automated in-game tests (src/gametest): singleplayer worlds driven by Fabric's client game test API.
+    fabricApi {
+        configureTests {
+            createSourceSet = true
+            modId = "htzdistance-gametest"
+            enableGameTests = false
+            enableClientGameTests = true
+            eula = false
+        }
     }
 }
 

@@ -44,3 +44,9 @@ replay_*.log
 
 # Recorded GIFs (large, see scripts/make_gifs.py)
 docs/gifs/
+
+# Local-only test tooling: in-game tests, self-test/benchmark mod, showcase and GIF scripts, screenshots
+src/gametest/
+src/selftest/
+scripts/
+screenshots/

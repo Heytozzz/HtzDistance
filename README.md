@@ -108,27 +108,17 @@ horizontally, X/Z only):
 ./gradlew build                 # every version, jars in versions/<mc>/build/libs/
 ./gradlew :1.21.8:build         # one version
 ./gradlew :1.21.8:runClient     # dev client
-./gradlew :1.21.8:runClientGameTest   # automated in-game tests
 ```
 
 The project uses [Stonecutter](https://stonecutter.kikugie.dev/) (one source tree, one jar per
 Minecraft version) with `loom-back-compat`, so obfuscated (1.21.x, Mojang mappings) and
 unobfuscated (26.x) versions share the same code.
 
-The client game tests create singleplayer worlds and use a test-only mixin that gives the
-integrated server the target server's ranges (16 blocks for armor stands, 8 for item frames).
-They cover capture, reconciliation, destroyed-entity detection, the in-range timeout, map
-capture, styles, occlusion culling, persistence, learning mode and the config screen.
+## Performance
 
-## Self-test in a real launcher instance
-
-`src/selftest` builds a separate test mod (`./gradlew :1.21.11:selftestJar`, output in
-`versions/<mc>/build/libs/htzdistance-selftest-<mc>.jar`). It is never part of the release jar
-and does nothing unless `htzdistance-selftest.trigger` exists in the game directory. With the
-trigger it creates a flat world, builds an armory (408 equipped armor stands) and a warehouse
-(about 2,000 item frames, 144 maps), measures real entities vs holograms (culling on/off) vs nothing,
-compares every hologram's rendered rotation with the real entity (all 45-degree steps, all frame
-facings and item rotations), writes `htzdistance-selftest-report.txt` plus screenshots and quits.
+Measured in real launcher instances with a local test mod (not part of this repository) that builds
+an armory (408 equipped armor stands) and a warehouse (about 2,000 item frames, 144 maps) and
+compares real entities, holograms (culling on/off) and nothing.
 
 Results with the author's modpacks (2,484 entities), with hologram render states reused across
 frames (re-extracted about once per second):
@@ -140,7 +130,7 @@ frames (re-extracted about once per second):
 
 Holograms are now cheaper than the real entities they replace.
 
-Focused bench (`bench` in the trigger file): one wall of 140 item frames with random items,
+Focused bench: one wall of 140 item frames with random items,
 26.3 with 267 mods (Sodium, EntityCulling, ImmediatelyFast, EMF/ETF, MyTotemDoll). Frame time
 is the render work per frame, without the frame limiter wait:
 
