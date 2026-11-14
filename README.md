@@ -25,20 +25,26 @@ cause any packet to be sent to the server.
 - **Persistence** (on by default): ghosts are saved per server and dimension in
   `<game dir>/htzdistance/<server>/<dimension>/ghosts.dat`, like Bobby.
 - Limits for max ghost count and max render distance.
-- **Show/hide key** (default `H`, rebindable in Controls): hides all ghosts without forgetting
-  them. Ghosts are visible again after a restart.
+- **Pause key** (default `H`, rebindable in Controls): hides all ghosts and pauses the whole
+  mod, so it costs nothing at all: no capture, no reconciliation, no drawing, and the culling
+  thread sleeps. Ghosts stay in memory; on resume, ghosts whose real entity came back meanwhile
+  are removed. The mod runs again after a restart.
 - **F3 stats**: ghost counts per type, ghosts drawn and the average cost per frame and per
   culling pass. From 1.21.10 on it is the `htzdistance:ghosts` entry of the debug options
   (F3 + F6), switched on for the F3 screen the first time the mod runs.
 - **`/htzdistance` client command**:
 
-  | Command                      | Effect                                                         |
-  |------------------------------|----------------------------------------------------------------|
-  | `/htzdistance` or `stats`    | Shows the same stats as F3 in chat                             |
-  | `/htzdistance toggle`        | Hides or shows the ghosts, like the key                        |
-  | `/htzdistance clear`         | Forgets the ghosts of the current dimension                    |
-  | `/htzdistance clear <radius>`| Forgets the ghosts within that many blocks of you              |
-  | `/htzdistance clear all`     | Forgets the ghosts of every dimension of this server, saved files included |
+  | Command                               | Effect                                                         |
+  |---------------------------------------|----------------------------------------------------------------|
+  | `/htzdistance` or `stats`             | Shows the same stats as F3 in chat                             |
+  | `/htzdistance toggle`                 | Pauses or resumes the mod, like the key                        |
+  | `/htzdistance clear`                  | Forgets the ghosts of the current dimension                    |
+  | `/htzdistance clear <radius>`         | Forgets the ghosts within that many blocks of you              |
+  | `/htzdistance clear all`              | Forgets the ghosts of every dimension of this server, saved files included |
+  | `/htzdistance config`                 | Lists every option of the config file with its value           |
+  | `/htzdistance config <option> <value>`| Changes and saves an option, e.g. `itemFrame.threshold 9`, `ghostStyle tint`, `tintColor #A0C8FF` |
+  | `/htzdistance config reset`           | Restores the defaults                                          |
+
 - Config screen through Mod Menu + YACL (both optional); the config file is
   `config/htzdistance.json`.
 
@@ -122,7 +128,22 @@ frames (re-extracted about once per second):
 | 26.3, 267 mods (Sodium, EntityCulling, Bobby, EMF/ETF)   | 1.6 / 3.1 ms per frame       | 18.1 / 29.0 ms | 13 / 20           | 0.05 ms per entity  |
 | 1.21.11, 172 mods (Sodium, Iris, EntityCulling, EMF/ETF) | 1.5 / 1.7 ms per frame       | 1.7 / 2.7 ms   | capped (59 / 59)  | 0.03 ms per entity  |
 
-Ghosts are now cheaper than the real entities they replace. Occlusion culling runs on its own
+Ghosts are now cheaper than the real entities they replace.
+
+Focused bench (`bench` in the trigger file): one wall of 140 item frames with random items,
+26.3 with 267 mods (Sodium, EntityCulling, ImmediatelyFast, EMF/ETF, MyTotemDoll). Frame time
+is the render work per frame, without the frame limiter wait:
+
+| Case                                           | Frame time | Cost of the frames |
+|------------------------------------------------|------------|--------------------|
+| Mod paused (nothing drawn)                     | 2.2 ms     | -                  |
+| Real item frames (vanilla)                     | 7.9 ms     | 5.7 ms             |
+| Ghosts, items resolved again every frame (old) | 7.6 ms     | 5.4 ms             |
+| Ghosts, item states restored from a copy (now) | 4.4 ms     | 2.2 ms             |
+
+Item render states of reused ghost states are restored from a shallow copy taken at extraction
+(fields added by other mods included) instead of being resolved again every frame, which keeps
+MyTotemDoll dolls stable at a fraction of the cost. Occlusion culling runs on its own
 thread (about 6-15 ms per pass for 2,484 ghosts, never blocking a frame) and roughly halves the
 number of ghosts drawn in that scene.
 
