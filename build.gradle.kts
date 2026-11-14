@@ -151,6 +151,15 @@ tasks {
         }.joinToString(",\n    ") { "\"$it\"" }
         inputs.property("client_mixins", clientMixins)
         filesMatching("htzdistance.mixins.json") { expand("java" to mixinJava, "client_mixins" to clientMixins) }
+
+        // Every Spanish variant uses the es_es translation.
+        val spanish = rootProject.file("src/main/resources/assets/htzdistance/lang/es_es.json")
+        for (locale in listOf("es_ar", "es_cl", "es_ec", "es_mx", "es_uy", "es_ve")) {
+            from(spanish) {
+                into("assets/htzdistance/lang")
+                rename { "$locale.json" }
+            }
+        }
     }
 
     // Ship the license inside the jar.
