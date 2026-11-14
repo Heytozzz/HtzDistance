@@ -1,6 +1,9 @@
 package com.heytozzz.htzdistance.test;
 
+import com.heytozzz.htzdistance.GhostStats;
 import com.heytozzz.htzdistance.HtzDistanceClient;
+import com.heytozzz.htzdistance.config.ConfigManager;
+import com.heytozzz.htzdistance.config.HtzConfig;
 import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
 import com.heytozzz.htzdistance.render.GhostRenderer;
@@ -88,14 +91,53 @@ public final class ToolsClientTest implements FabricClientGameTest {
             // Toggle key.
             context.getInput().pressKey(GhostToggle.key());
             context.waitTicks(3);
-            check(context.computeOnClient(client -> GhostToggle.isHidden()), "key hides the ghosts");
+            check(context.computeOnClient(client -> GhostToggle.isHidden()), "key pauses the mod");
             check(rendered(context) == 0, "hidden ghosts are not drawn");
             assertGhosts(context, 3, "hidden ghosts are kept");
             context.takeScreenshot("htzdistance-tools-02-hidden");
+            long passes = context.computeOnClient(client -> GhostStats.CULLING_PASSES.get());
+            context.waitTicks(10);
+            check(context.computeOnClient(client -> GhostStats.CULLING_PASSES.get()) == passes, "culling thread idle while paused");
+            // Paused: real entities coming back are not reconciled...
+            server.runCommand(tp(x + 0.5, y, z + 6.0));
+            context.waitTicks(30);
+            assertGhosts(context, 3, "paused mod does not reconcile");
             context.getInput().pressKey(GhostToggle.key());
             context.waitTicks(3);
-            check(!context.computeOnClient(client -> GhostToggle.isHidden()), "key shows the ghosts again");
+            check(!context.computeOnClient(client -> GhostToggle.isHidden()), "key resumes the mod");
+            // ...until it resumes.
+            assertGhosts(context, 0, "resume replaces ghosts whose real entity is back");
+            server.runCommand(tp(x + 0.5, y, z - 10.0));
+            context.waitTicks(30);
+            assertGhosts(context, 3, "ghosts captured again after resuming");
             check(rendered(context) == 3, "ghosts drawn again");
+
+            // Config command.
+            command(context, "htzdistance config");
+            command(context, "htzdistance config maxRenderDistance 50");
+            check(context.computeOnClient(client -> ConfigManager.get().maxRenderDistance) == 50.0, "config: number option");
+            command(context, "htzdistance config maxRenderDistance 1");
+            check(context.computeOnClient(client -> ConfigManager.get().maxRenderDistance) == 8.0, "config: value clamped like the file");
+            command(context, "htzdistance config itemFrame.threshold 9.5");
+            check(context.computeOnClient(client -> ConfigManager.get().itemFrame.threshold) == 9.5, "config: per-type option");
+            command(context, "htzdistance config occlusionCulling false");
+            check(!context.computeOnClient(client -> ConfigManager.get().occlusionCulling), "config: boolean option");
+            command(context, "htzdistance config ghostStyle tint");
+            check(context.computeOnClient(client -> ConfigManager.get().ghostStyle) == HtzConfig.GhostStyle.TINT, "config: enum option");
+            command(context, "htzdistance config tintColor #FF8000");
+            check(context.computeOnClient(client -> ConfigManager.get().tintColor) == 0xFF8000, "config: color option");
+            command(context, "htzdistance config translucentAlpha 0.5");
+            check(context.computeOnClient(client -> ConfigManager.get().translucentAlpha) == 0.5f, "config: float option");
+            commandFails(context, "htzdistance config occlusionCulling maybe");
+            commandFails(context, "htzdistance config noSuchOption 1");
+            command(context, "htzdistance config reset");
+            check(context.computeOnClient(client -> {
+                HtzConfig config = ConfigManager.get();
+                HtzConfig defaults = new HtzConfig();
+                return config.maxRenderDistance == defaults.maxRenderDistance && config.occlusionCulling
+                        && config.itemFrame.threshold == defaults.itemFrame.threshold
+                        && config.ghostStyle == HtzConfig.GhostStyle.NORMAL;
+            }), "config: reset to defaults");
 
             // Toggle command.
             command(context, "htzdistance toggle");
@@ -158,6 +200,23 @@ public final class ToolsClientTest implements FabricClientGameTest {
             }
         });
         HtzDistanceClient.LOGGER.info("[gametest] ran /{}", command);
+    }
+
+    private static void commandFails(ClientGameTestContext context, String command) {
+        boolean failed = context.computeOnClient(client -> {
+            FabricClientCommandSource source = (FabricClientCommandSource) client.getConnection().getSuggestionsProvider();
+            try {
+                //? if >=26.1 {
+                /*ClientCommands.getActiveDispatcher().execute(command, source);
+                *///?} else {
+                ClientCommandManager.getActiveDispatcher().execute(command, source);
+                //?}
+                return false;
+            } catch (CommandSyntaxException e) {
+                return true;
+            }
+        });
+        check(failed, "/" + command + " is rejected");
     }
 
     private static Path serverDir(Minecraft client) {
