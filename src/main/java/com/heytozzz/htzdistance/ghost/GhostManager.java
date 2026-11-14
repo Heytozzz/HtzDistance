@@ -128,7 +128,7 @@ public final class GhostManager {
             GhostStats.CAPTURES.addAndGet(captured);
         }
         if (added) {
-            int dropped = current.enforceLimit(config.maxGhosts, player.getX(), player.getY(), player.getZ());
+            int dropped = current.enforceLimit(config.maxHolograms, player.getX(), player.getY(), player.getZ());
             if (dropped > 0) {
                 HtzDistanceClient.debug("Ghost limit reached, dropped {} farthest ghosts", dropped);
             }
@@ -174,10 +174,6 @@ public final class GhostManager {
         }
 
         HtzConfig config = ConfigManager.get();
-        if (!config.enabled) {
-            current.clear();
-            return;
-        }
 
         long now = Util.getMillis();
         long timeoutMs = (long) (config.inRangeTimeoutSeconds * 1000.0);

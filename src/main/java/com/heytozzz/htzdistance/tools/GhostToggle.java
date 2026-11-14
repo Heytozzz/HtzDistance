@@ -1,6 +1,8 @@
 package com.heytozzz.htzdistance.tools;
 
 import com.heytozzz.htzdistance.HtzDistanceClient;
+import com.heytozzz.htzdistance.config.ConfigManager;
+import com.heytozzz.htzdistance.config.HtzConfig;
 import com.heytozzz.htzdistance.culling.CullingWorker;
 import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -19,14 +21,15 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 *///?}
 
 /**
- * Pauses or resumes the whole mod at runtime (key, default H, or {@code /htzdistance toggle}).
- * While paused the mod does no work at all: nothing is captured, reconciled, drawn or traced,
- * and the culling thread sleeps. Stored ghosts stay in memory; on resume, ghosts whose real
- * entity came back meanwhile are removed. The state is not saved: the mod runs again after a
- * restart.
+ * Turns the whole mod off and on (key, default H, {@code /htzdistance toggle}, or the "enabled"
+ * option). The state is the {@code enabled} config option, so it is saved and survives restarts.
+ * While off the mod does no work at all: nothing is captured, reconciled, drawn or traced, and
+ * the culling thread sleeps. Stored holograms stay in memory; when the mod is turned on again,
+ * holograms whose real entity came back meanwhile are removed.
  */
 public final class GhostToggle {
-    private static boolean hidden;
+    /** Last state seen, to react when the option is changed elsewhere (config screen, command). */
+    private static boolean lastEnabled = true;
     private static KeyMapping key;
 
     private GhostToggle() {
@@ -45,11 +48,13 @@ public final class GhostToggle {
         *///?} else {
         key = KeyBindingHelper.registerKeyBinding(mapping);
         //?}
+        lastEnabled = ConfigManager.get().enabled;
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (key.consumeClick()) {
                 toggle();
                 notify(client);
             }
+            checkChange();
         });
     }
 
@@ -57,31 +62,45 @@ public final class GhostToggle {
         return key;
     }
 
+    /** {@code true} while the mod is turned off. */
     public static boolean isHidden() {
-        return hidden;
+        return !ConfigManager.get().enabled;
     }
 
+    /** Turns the mod off ({@code true}) or on, and saves the choice. */
     public static void setHidden(boolean value) {
-        if (hidden == value) {
+        if (isHidden() == value) {
             return;
         }
-        hidden = value;
-        if (hidden) {
-            CullingWorker.get().clear();
-        } else {
-            GhostManager.get().resume();
-        }
-        HtzDistanceClient.debug("HtzDistance {}", hidden ? "paused" : "resumed");
+        HtzConfig copy = ConfigManager.copy();
+        copy.enabled = !value;
+        ConfigManager.apply(copy);
+        checkChange();
     }
 
-    /** Flips the state and returns the new one ({@code true} = hidden). */
+    /** Flips the state and returns the new one ({@code true} = off). */
     public static boolean toggle() {
-        setHidden(!hidden);
-        return hidden;
+        setHidden(!isHidden());
+        return isHidden();
     }
 
     public static Component stateMessage() {
-        return Component.translatable(hidden ? "htzdistance.message.hidden" : "htzdistance.message.shown");
+        return Component.translatable(isHidden() ? "htzdistance.message.hidden" : "htzdistance.message.shown");
+    }
+
+    /** Stops or resumes the background work when the state changed. */
+    private static void checkChange() {
+        boolean enabled = ConfigManager.get().enabled;
+        if (enabled == lastEnabled) {
+            return;
+        }
+        lastEnabled = enabled;
+        if (enabled) {
+            GhostManager.get().resume();
+        } else {
+            CullingWorker.get().clear();
+        }
+        HtzDistanceClient.debug("HtzDistance turned {}", enabled ? "on" : "off");
     }
 
     private static void notify(Minecraft client) {
