@@ -43,6 +43,8 @@ public final class CullingWorker {
 
     private volatile boolean running;
     private Thread thread;
+    /** The worker waits on this while there is nothing to trace (no ghosts, mod paused). */
+    private final Object idle = new Object();
 
     private CullingWorker() {
     }
@@ -77,7 +79,13 @@ public final class CullingWorker {
         if (store != publishedStore || store.revision() != publishedRevision) {
             publishedStore = store;
             publishedRevision = store.revision();
+            boolean wasEmpty = ghosts.isEmpty();
             ghosts = List.copyOf(store.view());
+            if (wasEmpty && !ghosts.isEmpty()) {
+                synchronized (idle) {
+                    idle.notifyAll();
+                }
+            }
         }
     }
 
@@ -92,6 +100,19 @@ public final class CullingWorker {
 
     private void run() {
         while (running) {
+            if (ghosts.isEmpty() || level == null) {
+                // Nothing to trace: sleep until publish() hands over ghosts again.
+                synchronized (idle) {
+                    try {
+                        while (running && (ghosts.isEmpty() || level == null)) {
+                            idle.wait();
+                        }
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+                continue;
+            }
             long start = System.nanoTime();
             try {
                 pass();

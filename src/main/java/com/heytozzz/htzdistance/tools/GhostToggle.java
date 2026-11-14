@@ -1,6 +1,8 @@
 package com.heytozzz.htzdistance.tools;
 
 import com.heytozzz.htzdistance.HtzDistanceClient;
+import com.heytozzz.htzdistance.culling.CullingWorker;
+import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.KeyMapping;
@@ -17,9 +19,11 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 *///?}
 
 /**
- * Hides or shows all ghosts at runtime (key, default H, or {@code /htzdistance toggle}).
- * Ghosts keep being captured and reconciled while hidden; only drawing stops. The state is not
- * saved: ghosts are visible again after a restart.
+ * Pauses or resumes the whole mod at runtime (key, default H, or {@code /htzdistance toggle}).
+ * While paused the mod does no work at all: nothing is captured, reconciled, drawn or traced,
+ * and the culling thread sleeps. Stored ghosts stay in memory; on resume, ghosts whose real
+ * entity came back meanwhile are removed. The state is not saved: the mod runs again after a
+ * restart.
  */
 public final class GhostToggle {
     private static boolean hidden;
@@ -58,8 +62,16 @@ public final class GhostToggle {
     }
 
     public static void setHidden(boolean value) {
+        if (hidden == value) {
+            return;
+        }
         hidden = value;
-        HtzDistanceClient.debug("Ghosts {}", hidden ? "hidden" : "shown");
+        if (hidden) {
+            CullingWorker.get().clear();
+        } else {
+            GhostManager.get().resume();
+        }
+        HtzDistanceClient.debug("HtzDistance {}", hidden ? "paused" : "resumed");
     }
 
     /** Flips the state and returns the new one ({@code true} = hidden). */

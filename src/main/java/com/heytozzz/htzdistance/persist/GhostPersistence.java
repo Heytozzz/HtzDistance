@@ -8,6 +8,7 @@ import com.heytozzz.htzdistance.ghost.Ghost;
 import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
 import com.heytozzz.htzdistance.ghost.WorldKey;
+import com.heytozzz.htzdistance.tools.GhostToggle;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.SharedConstants;
@@ -142,6 +143,9 @@ public final class GhostPersistence implements GhostManager.StoreListener {
     }
 
     private void autosave(Minecraft minecraft) {
+        if (GhostToggle.isHidden()) {
+            return;
+        }
         GhostStore store = GhostManager.get().store();
         if (store == null || store.revision() == savedRevision) {
             return;

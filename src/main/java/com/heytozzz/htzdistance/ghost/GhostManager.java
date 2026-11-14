@@ -15,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import com.heytozzz.htzdistance.tools.GhostToggle;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,6 +72,9 @@ public final class GhostManager {
 
     /** Called from the packet mixin before the client removes the given entities. */
     public void onRemoveEntities(IntList entityIds) {
+        if (GhostToggle.isHidden()) {
+            return;
+        }
         Minecraft minecraft = Minecraft.getInstance();
         ClientLevel level = minecraft.level;
         LocalPlayer player = minecraft.player;
@@ -134,6 +138,10 @@ public final class GhostManager {
     // ------------------------------------------------------------------ reconciliation
 
     private void onEntityLoad(Entity entity, ClientLevel level) {
+        if (GhostToggle.isHidden()) {
+            // Reconciled in one pass on resume (see resume()).
+            return;
+        }
         GhostKind kind = SnapshotFactory.kindOf(entity);
         if (kind == null) {
             return;
@@ -156,6 +164,9 @@ public final class GhostManager {
 
     private void tick(Minecraft minecraft) {
         GhostStore current = ensureStore(minecraft, minecraft.level);
+        if (GhostToggle.isHidden()) {
+            return;
+        }
         LocalPlayer player = minecraft.player;
         RangeLearner.get().tickPlayer(player);
         if (current == null || player == null || current.size() == 0) {
@@ -204,6 +215,30 @@ public final class GhostManager {
         }
         if (changed) {
             current.markChanged();
+        }
+    }
+
+    /**
+     * Called when the mod resumes after a pause: real entities that came back while paused were
+     * not reconciled, so their ghosts are removed now.
+     */
+    public void resume() {
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientLevel level = minecraft.level;
+        GhostStore current = ensureStore(minecraft, level);
+        if (level == null || current == null || current.size() == 0) {
+            return;
+        }
+        double radius = ConfigManager.get().reconcileRadius;
+        int removed = 0;
+        for (Entity entity : level.entitiesForRendering()) {
+            GhostKind kind = SnapshotFactory.kindOf(entity);
+            if (kind != null) {
+                removed += current.removeNear(kind, entity.getX(), entity.getY(), entity.getZ(), radius);
+            }
+        }
+        if (removed > 0) {
+            HtzDistanceClient.debug("Resumed: {} ghost(s) replaced by real entities", removed);
         }
     }
 
