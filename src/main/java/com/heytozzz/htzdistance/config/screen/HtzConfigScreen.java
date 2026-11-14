@@ -111,18 +111,11 @@ public final class HtzConfigScreen {
                                 .enumClass(HtzConfig.GhostStyle.class)
                                 .formatValue(style -> text("hologramStyle." + style.name().toLowerCase(Locale.ROOT))))
                         .build())
-                .option(Option.<Color>createBuilder()
-                        .name(text("tintColor"))
-                        .description(OptionDescription.of(text("tintColor.description")))
-                        .binding(new Color(defaults.tintColor), () -> new Color(edited.tintColor), v -> edited.tintColor = v.getRGB() & 0xFFFFFF)
-                        .controller(ColorControllerBuilder::create)
-                        .build())
-                .option(Option.<Float>createBuilder()
-                        .name(text("translucentAlpha"))
-                        .description(OptionDescription.of(text("translucentAlpha.description")))
-                        .binding(defaults.translucentAlpha, () -> edited.translucentAlpha, v -> edited.translucentAlpha = v)
-                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.1f, 1.0f).step(0.05f))
-                        .build());
+                .option(color("tintColor", defaults.tintColor, () -> edited.tintColor, v -> edited.tintColor = v))
+                .option(percent("tintOpacity", defaults.tintOpacity, 0.05f, () -> edited.tintOpacity, v -> edited.tintOpacity = v))
+                .option(percent("translucentAlpha", defaults.translucentAlpha, 0.1f, () -> edited.translucentAlpha, v -> edited.translucentAlpha = v))
+                .option(bool("glowing", defaults.glowing, () -> edited.glowing, v -> edited.glowing = v))
+                .option(color("glowColor", defaults.glowColor, () -> edited.glowColor, v -> edited.glowColor = v));
 
         ConfigCategory.Builder storage = ConfigCategory.createBuilder()
                 .name(text("category.storage"))
@@ -171,6 +164,26 @@ public final class HtzConfigScreen {
                 .description(OptionDescription.of(text(key + ".description")))
                 .binding(def, getter, setter)
                 .controller(TickBoxControllerBuilder::create)
+                .build();
+    }
+
+    private static Option<Color> color(String key, int def, Supplier<Integer> getter, Consumer<Integer> setter) {
+        return Option.<Color>createBuilder()
+                .name(text(key))
+                .description(OptionDescription.of(text(key + ".description")))
+                .binding(new Color(def), () -> new Color(getter.get()), v -> setter.accept(v.getRGB() & 0xFFFFFF))
+                .controller(ColorControllerBuilder::create)
+                .build();
+    }
+
+    /** A 0-1 value shown as a percentage. */
+    private static Option<Float> percent(String key, float def, float min, Supplier<Float> getter, Consumer<Float> setter) {
+        return Option.<Float>createBuilder()
+                .name(text(key))
+                .description(OptionDescription.of(text(key + ".description")))
+                .binding(def, getter, setter)
+                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(min, 1.0f).step(0.05f)
+                        .formatValue(v -> Component.literal(Math.round(v * 100.0f) + "%")))
                 .build();
     }
 

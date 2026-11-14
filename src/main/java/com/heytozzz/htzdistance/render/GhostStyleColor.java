@@ -17,14 +17,33 @@ public record GhostStyleColor(int red, int green, int blue, int alpha, boolean t
     public static GhostStyleColor from(HtzConfig config) {
         return switch (config.hologramStyle) {
             case NORMAL -> NONE;
+            // Like tinted glass in front of the hologram: each channel is filtered by the tint
+            // color, blended with "no filter" (white) by the tint opacity.
             case TINT -> new GhostStyleColor(
-                    (config.tintColor >> 16) & 0xFF,
-                    (config.tintColor >> 8) & 0xFF,
-                    config.tintColor & 0xFF,
+                    filter((config.tintColor >> 16) & 0xFF, config.tintOpacity),
+                    filter((config.tintColor >> 8) & 0xFF, config.tintOpacity),
+                    filter(config.tintColor & 0xFF, config.tintOpacity),
                     255,
                     false);
             case TRANSLUCENT -> new GhostStyleColor(255, 255, 255, Math.round(config.translucentAlpha * 255.0f), true);
         };
+    }
+
+    private static int filter(int channel, float opacity) {
+        return Math.round(255.0f + (channel - 255.0f) * opacity);
+    }
+
+    /** The multipliers as one ARGB color, for vanilla tint arguments. */
+    public int argb() {
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    /** Multiplies an ARGB color by this style. */
+    public int apply(int argb) {
+        return applyAlpha(argb >>> 24) << 24
+                | applyRed((argb >> 16) & 0xFF) << 16
+                | applyGreen((argb >> 8) & 0xFF) << 8
+                | applyBlue(argb & 0xFF);
     }
 
     public boolean isIdentity() {

@@ -29,9 +29,9 @@ public final class HtzConfig {
     public enum GhostStyle {
         /** Rendered exactly like the real entity. */
         NORMAL,
-        /** Rendered with a slight color tint. */
+        /** Rendered as if seen through tinted glass: colors filtered by {@code tintColor}. */
         TINT,
-        /** Rendered semi-transparent. */
+        /** Rendered semi-transparent ({@code translucentAlpha}). */
         TRANSLUCENT
     }
 
@@ -78,8 +78,17 @@ public final class HtzConfig {
     /** Tint color as 0xRRGGBB, used when {@link #hologramStyle} is {@link GhostStyle#TINT}. */
     public int tintColor = 0xA0C8FF;
 
+    /** Strength of the tint in [0.05, 1]: 0 would leave the real colors, 1 filters them fully. */
+    public float tintOpacity = 0.6f;
+
     /** Opacity in [0.1, 1], used when {@link #hologramStyle} is {@link GhostStyle#TRANSLUCENT}. */
     public float translucentAlpha = 0.6f;
+
+    /** Glowing outline around holograms (Minecraft 1.21.10+), independent of the style. */
+    public boolean glowing = false;
+
+    /** Outline color as 0xRRGGBB, used when {@link #glowing} is on. */
+    public int glowColor = 0xA0C8FF;
 
     /**
      * Reuse ghost render states across frames (Minecraft 1.21.10+): much cheaper with many ghosts.
@@ -138,7 +147,9 @@ public final class HtzConfig {
         double timeout = clamp(inRangeTimeoutSeconds, 0.5, 600.0, 5.0);
         double radius = clamp(reconcileRadius, 0.05, 4.0, 0.5);
         float alpha = (float) clamp(translucentAlpha, 0.1, 1.0, 0.6);
+        float tintStrength = (float) clamp(tintOpacity, 0.05, 1.0, 0.6);
         int tint = tintColor & 0xFFFFFF;
+        int glow = glowColor & 0xFFFFFF;
         GhostStyle style = hologramStyle == null ? GhostStyle.NORMAL : hologramStyle;
 
         changed |= margin != thresholdMargin
@@ -147,7 +158,9 @@ public final class HtzConfig {
                 || timeout != inRangeTimeoutSeconds
                 || radius != reconcileRadius
                 || alpha != translucentAlpha
+                || tintStrength != tintOpacity
                 || tint != tintColor
+                || glow != glowColor
                 || style != hologramStyle;
 
         thresholdMargin = margin;
@@ -156,7 +169,9 @@ public final class HtzConfig {
         inRangeTimeoutSeconds = timeout;
         reconcileRadius = radius;
         translucentAlpha = alpha;
+        tintOpacity = tintStrength;
         tintColor = tint;
+        glowColor = glow;
         hologramStyle = style;
         return changed;
     }

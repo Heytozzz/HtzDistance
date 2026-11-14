@@ -44,10 +44,14 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 final class ConfigCommand {
     /** Internal bookkeeping fields that are not user options. */
     private static final List<String> HIDDEN = List.of("hologramsDebugEntryEnabled");
-    private static final String TINT = "tintColor";
 
     /** One option: the field path from {@link HtzConfig} to the value. */
     private record Option(String name, Field[] path) {
+        /** Colors (tintColor, glowColor) are ints written as #RRGGBB. */
+        boolean isColor() {
+            return name.endsWith("Color") && leaf().getType() == int.class;
+        }
+
         Field leaf() {
             return path[path.length - 1];
         }
@@ -70,7 +74,7 @@ final class ConfigCommand {
 
         String format(HtzConfig config) throws IllegalAccessException {
             Object value = get(config);
-            if (name.equals(TINT)) {
+            if (isColor()) {
                 return String.format(Locale.ROOT, "#%06X", (Integer) value);
             }
             if (value instanceof Enum<?> e) {
@@ -99,7 +103,7 @@ final class ConfigCommand {
 
     private static RequiredArgumentBuilder<FabricClientCommandSource, ?> valueArgument(Option option) {
         Class<?> type = option.leaf().getType();
-        if (option.name().equals(TINT)) {
+        if (option.isColor()) {
             // Greedy: "#" is not allowed in a single-word argument.
             return argument("value", StringArgumentType.greedyString())
                     .executes(context -> set(context, option, parseColor(StringArgumentType.getString(context, "value").trim())));
