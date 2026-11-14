@@ -43,6 +43,20 @@ public final class GhostManager {
 
     @Nullable
     private GhostStore store;
+    /** Real entities that came back and still have to replace their ghost (see onEntityLoad). */
+    private final List<PendingReal> pendingReal = new ArrayList<>();
+
+    /** A real entity waiting for its data, and the client ticks waited so far. */
+    private static final class PendingReal {
+        final Entity entity;
+        final GhostKind kind;
+        int ticks;
+
+        PendingReal(Entity entity, GhostKind kind) {
+            this.entity = entity;
+            this.kind = kind;
+        }
+    }
     @Nullable
     private ClientLevel trackedLevel;
 
@@ -156,17 +170,44 @@ public final class GhostManager {
             double distance = RangeClassifier.horizontalDistance(player.getX(), player.getZ(), entity.getX(), entity.getZ());
             RangeLearner.get().onAdded(current.key().server(), kind, entity, distance);
         }
-        int removed = current.removeNear(kind, entity.getX(), entity.getY(), entity.getZ(), ConfigManager.get().reconcileRadius);
-        if (removed > 0) {
-            HtzDistanceClient.debug("Real {} is back at {}, removed {} ghost(s)", kind, entity.blockPosition(), removed);
+        // The entity is added before its data (armor stand equipment and pose, painting variant
+        // and so its position) is applied. Removing the ghost now would show the bare entity for
+        // a moment, so the ghost is replaced once the entity has ticked (see reconcilePending).
+        pendingReal.add(new PendingReal(entity, kind));
+    }
+
+    /** Replaces ghosts by the real entities that came back, once their data has arrived. */
+    private void reconcilePending(Minecraft minecraft, @Nullable GhostStore current) {
+        if (pendingReal.isEmpty()) {
+            return;
         }
+        double radius = ConfigManager.get().reconcileRadius;
+        pendingReal.removeIf(pending -> {
+            Entity entity = pending.entity;
+            if (current == null || entity.isRemoved() || entity.level() != minecraft.level) {
+                return true;
+            }
+            // Ticked once (data packets are handled before the tick), or waited long enough when
+            // entity ticking is frozen.
+            if (entity.tickCount < 1 && ++pending.ticks < 3) {
+                return false;
+            }
+            int removed = current.removeNear(pending.kind, entity.getX(), entity.getY(), entity.getZ(), radius);
+            if (removed > 0) {
+                HtzDistanceClient.debug("Real {} is back at {}, removed {} ghost(s)", pending.kind, entity.blockPosition(), removed);
+            }
+            return true;
+        });
     }
 
     private void tick(Minecraft minecraft) {
         GhostStore current = ensureStore(minecraft, minecraft.level);
         if (GhostToggle.isHidden()) {
+            // Turning the mod on again reconciles everything in one pass (see resume()).
+            pendingReal.clear();
             return;
         }
+        reconcilePending(minecraft, current);
         LocalPlayer player = minecraft.player;
         RangeLearner.get().tickPlayer(player);
         if (current == null || player == null || current.size() == 0) {
