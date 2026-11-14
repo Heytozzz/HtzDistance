@@ -7,6 +7,7 @@ import com.heytozzz.htzdistance.config.HtzConfig;
 import com.heytozzz.htzdistance.ghost.GhostManager;
 import com.heytozzz.htzdistance.ghost.GhostStore;
 import com.heytozzz.htzdistance.render.GhostRenderer;
+import com.heytozzz.htzdistance.tools.ConfigKey;
 import com.heytozzz.htzdistance.tools.DebugStats;
 import com.heytozzz.htzdistance.tools.GhostToggle;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -135,6 +136,13 @@ public final class ToolsClientTest implements FabricClientGameTest {
             check(context.computeOnClient(client -> ConfigManager.get().tintColor) == 0xFF8000, "config: color option");
             command(context, "htzdistance config translucentAlpha 0.5");
             check(context.computeOnClient(client -> ConfigManager.get().translucentAlpha) == 0.5f, "config: float option");
+            command(context, "htzdistance config tintOpacity 0.25");
+            check(context.computeOnClient(client -> ConfigManager.get().tintOpacity) == 0.25f, "config: tint opacity");
+            command(context, "htzdistance config glowing true");
+            command(context, "htzdistance config glowColor #00FF00");
+            check(context.computeOnClient(client -> ConfigManager.get().glowing && ConfigManager.get().glowColor == 0x00FF00),
+                    "config: glow is its own option with its own color");
+            check(context.computeOnClient(client -> ConfigManager.get().tintColor) == 0xFF8000, "config: tint color unchanged by the glow color");
             commandFails(context, "htzdistance config occlusionCulling maybe");
             commandFails(context, "htzdistance config noSuchOption 1");
             command(context, "htzdistance config reset");
@@ -145,6 +153,14 @@ public final class ToolsClientTest implements FabricClientGameTest {
                         && config.itemFrame.threshold == defaults.itemFrame.threshold
                         && config.hologramStyle == HtzConfig.GhostStyle.NORMAL;
             }), "config: reset to defaults");
+
+            // Config key: opens the config screen (YACL is present in dev runs).
+            context.getInput().pressKey(ConfigKey.key());
+            context.waitTicks(3);
+            check(context.computeOnClient(client -> ConfigKey.screen(client) != null), "config key opens the config screen");
+            context.takeScreenshot("htzdistance-tools-03-config-screen");
+            context.runOnClient(client -> ConfigKey.setScreen(client, null));
+            context.waitTicks(2);
 
             // Toggle command.
             command(context, "htzdistance toggle");

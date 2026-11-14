@@ -74,13 +74,30 @@ public final class GhostLifecycleClientTest implements FabricClientGameTest {
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-02-ghosts-normal");
 
-            TestSupport.updateConfig(context, config -> config.hologramStyle = HtzConfig.GhostStyle.TINT);
+            TestSupport.updateConfig(context, config -> {
+                config.hologramStyle = HtzConfig.GhostStyle.TINT;
+                config.tintColor = 0xFF4040;
+                config.tintOpacity = 0.7f;
+            });
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-03-ghosts-tint");
+            check(context.computeOnClient(client -> GhostRenderer.lastFrameRendered()) == 3, "tinted ghosts rendered");
             TestSupport.updateConfig(context, config -> config.hologramStyle = HtzConfig.GhostStyle.TRANSLUCENT);
             context.waitTicks(3);
             context.takeScreenshot("htzdistance-04-ghosts-translucent");
-            TestSupport.updateConfig(context, config -> config.hologramStyle = HtzConfig.GhostStyle.NORMAL);
+            check(context.computeOnClient(client -> GhostRenderer.lastFrameRendered()) == 3, "translucent ghosts rendered");
+            TestSupport.updateConfig(context, config -> {
+                config.hologramStyle = HtzConfig.GhostStyle.NORMAL;
+                config.glowing = true;
+                config.glowColor = 0x40FF40;
+            });
+            context.waitTicks(3);
+            context.takeScreenshot("htzdistance-04b-ghosts-glowing");
+            //? if >=1.21.10 {
+            /*check(!context.computeOnClient(client -> com.heytozzz.htzdistance.render.HologramSubmits.styleFailed()),
+                    "hologram style applied without errors");
+            *///?}
+            TestSupport.updateConfig(context, config -> config.glowing = false);
 
             // Occlusion culling: a wall between the player and the ghosts hides them.
             String wall = String.format(Locale.ROOT, "fill %d %d %d %d %d %d", x - 8, y, z - 6, x + 8, y + 5, z - 6);
