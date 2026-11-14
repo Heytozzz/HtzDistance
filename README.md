@@ -3,9 +3,9 @@
 Client-only Fabric mod that keeps showing **armor stands**, **item frames**, **glow item
 frames** and **paintings** after the server stops sending them because you walked out of its entity tracking
 range. Right before the client deletes such an entity, the mod takes a snapshot of it and keeps
-drawing it as a **ghost** until the real entity comes back into range.
+drawing it as a **hologram** until the real entity comes back into range.
 
-Ghosts are never added to the world: they cannot be targeted, clicked or hit, and they never
+Holograms are never added to the world: they cannot be targeted, clicked or hit, and they never
 cause any packet to be sent to the server.
 
 ## Features
@@ -15,42 +15,45 @@ cause any packet to be sent to the server.
 - **Maps** in item frames keep their picture (map colors are captured too).
 - **Out of range vs destroyed**: an entity removed while you were well inside its tracking range
   was destroyed and is not kept. If you stand inside the real range and the entity does not come
-  back within a few seconds, its ghost is removed.
-- **Reconciliation**: when the real entity is sent again, the ghost at that spot disappears.
+  back within a few seconds, its hologram is removed.
+- **Reconciliation**: when the real entity is sent again, the hologram at that spot disappears.
 - **Occlusion culling** like EntityCulling: asynchronous ray tracing on a background thread with
   the [LogisticsCraft OcclusionCulling](https://github.com/LogisticsCraft/OcclusionCulling)
-  library (MIT); ghosts hidden behind blocks are skipped.
+  library (MIT); holograms hidden behind blocks are skipped.
 - **Learning mode** (optional): measures the real disappearance distance of each entity type on
   each server and uses it instead of the configured values.
-- **Persistence** (on by default): ghosts are saved per server and dimension in
+- **Persistence** (on by default): holograms are saved per server and dimension in
   `<game dir>/htzdistance/<server>/<dimension>/ghosts.dat`, like Bobby.
-- Limits for max ghost count and max render distance.
-- **Pause key** (default `H`, rebindable in Controls): hides all ghosts and pauses the whole
-  mod, so it costs nothing at all: no capture, no reconciliation, no drawing, and the culling
-  thread sleeps. Ghosts stay in memory; on resume, ghosts whose real entity came back meanwhile
-  are removed. The mod runs again after a restart.
-- **F3 stats**: ghost counts per type, ghosts drawn and the average cost per frame and per
-  culling pass. From 1.21.10 on it is the `htzdistance:ghosts` entry of the debug options
+- Limits for max hologram count and max render distance.
+- **Toggle Mod key** (default `H`, rebindable in Controls): turns the whole mod off and on and
+  shows "Htz: Holograms ON/OFF" above the hotbar. Off, it costs nothing at all: no capture, no
+  reconciliation, no drawing, and the culling thread sleeps. It is the `enabled` option, so the
+  choice is saved and kept after a restart. Holograms stay in memory; when the mod is turned on
+  again, holograms whose real entity came back meanwhile are removed.
+- **F3 stats**: hologram counts per type, holograms drawn and the average cost per frame and per
+  culling pass. From 1.21.10 on it is the `htzdistance:holograms` entry of the debug options
   (F3 + F6), switched on for the F3 screen the first time the mod runs.
 - **`/htzdistance` client command**:
 
   | Command                               | Effect                                                         |
   |---------------------------------------|----------------------------------------------------------------|
   | `/htzdistance` or `stats`             | Shows the same stats as F3 in chat                             |
-  | `/htzdistance toggle`                 | Pauses or resumes the mod, like the key                        |
-  | `/htzdistance clear`                  | Forgets the ghosts of the current dimension                    |
-  | `/htzdistance clear <radius>`         | Forgets the ghosts within that many blocks of you              |
-  | `/htzdistance clear all`              | Forgets the ghosts of every dimension of this server, saved files included |
+  | `/htzdistance toggle`                 | Turns the mod off or on, like the key                          |
+  | `/htzdistance clear`                  | Forgets the holograms of the current dimension                    |
+  | `/htzdistance clear <radius>`         | Forgets the holograms within that many blocks of you              |
+  | `/htzdistance clear all`              | Forgets the holograms of every dimension of this server, saved files included |
   | `/htzdistance config`                 | Lists every option of the config file with its value           |
-  | `/htzdistance config <option> <value>`| Changes and saves an option, e.g. `itemFrame.threshold 9`, `ghostStyle tint`, `tintColor #A0C8FF` |
+  | `/htzdistance config <option> <value>`| Changes and saves an option, e.g. `itemFrame.threshold 9`, `hologramStyle tint`, `tintColor #A0C8FF` |
   | `/htzdistance config reset`           | Restores the defaults                                          |
 
+- **Languages**: English and Spanish (every Spanish variant: es_es, es_mx, es_ar, es_cl, es_ec,
+  es_uy, es_ve).
 - Config screen through Mod Menu + YACL (both optional); the config file is
   `config/htzdistance.json`.
 
 ## Supported versions
 
-| Minecraft        | Jar            | Fabric API | Ghost style (tint / translucent)           |
+| Minecraft        | Jar            | Fabric API | Hologram style (tint / translucent)           |
 |------------------|----------------|------------|--------------------------------------------|
 | 1.21.8           | `+1.21.8`      | required   | real tint and real translucency            |
 | 1.21.10          | `+1.21.10`     | required   | glowing outline in the tint color          |
@@ -60,7 +63,7 @@ cause any packet to be sent to the server.
 | 26.3             | `+26.3`        | required   | glowing outline in the tint color          |
 
 1.21.9 is not supported (its Fabric API has no world render event; 1.21.10 is the hotfix).
-From 1.21.10 on, Minecraft draws entities from deferred render states, so ghosts are drawn by
+From 1.21.10 on, Minecraft draws entities from deferred render states, so holograms are drawn by
 vanilla together with the real entities and the non-normal styles use the vanilla outline.
 
 Optional: [Mod Menu](https://modrinth.com/mod/modmenu) and
@@ -79,17 +82,17 @@ horizontally, X/Z only):
 | Painting tracking range       | 8       |
 | Range margin                  | 1.5     |
 | "Destroyed" timeout           | 5 s     |
-| Max ghost render distance     | 96      |
-| Max ghosts per dimension      | 1024    |
+| Max hologram render distance     | 96      |
+| Max holograms per dimension      | 1024    |
 | Occlusion culling             | on      |
 | Persistence                   | on      |
 | Learning mode                 | off     |
 
 ## Compatibility
 
-- **EntityCulling**: no conflict. Ghosts are not in the world, so EntityCulling never sees them;
+- **EntityCulling**: no conflict. Holograms are not in the world, so EntityCulling never sees them;
   EntityCulling ships its own relocated copy of the culling library.
-- **Bobby / Distant Horizons**: independent; ghosts follow the normal render distance setting of
+- **Bobby / Distant Horizons**: independent; holograms follow the normal render distance setting of
   the mod.
 
 ## Building
@@ -116,19 +119,19 @@ capture, styles, occlusion culling, persistence, learning mode and the config sc
 `versions/<mc>/build/libs/htzdistance-selftest-<mc>.jar`). It is never part of the release jar
 and does nothing unless `htzdistance-selftest.trigger` exists in the game directory. With the
 trigger it creates a flat world, builds an armory (408 equipped armor stands) and a warehouse
-(about 2,000 item frames, 144 maps), measures real entities vs ghosts (culling on/off) vs nothing,
-compares every ghost's rendered rotation with the real entity (all 45-degree steps, all frame
+(about 2,000 item frames, 144 maps), measures real entities vs holograms (culling on/off) vs nothing,
+compares every hologram's rendered rotation with the real entity (all 45-degree steps, all frame
 facings and item rotations), writes `htzdistance-selftest-report.txt` plus screenshots and quits.
 
-Results with the author's modpacks (2,484 entities), with ghost render states reused across
+Results with the author's modpacks (2,484 entities), with hologram render states reused across
 frames (re-extracted about once per second):
 
-| Instance                                                 | Ghost cost, culling on / off | Before caching | FPS real / ghosts | Capture             |
+| Instance                                                 | Hologram cost, culling on / off | Before caching | FPS real / holograms | Capture             |
 |----------------------------------------------------------|------------------------------|----------------|-------------------|---------------------|
 | 26.3, 267 mods (Sodium, EntityCulling, Bobby, EMF/ETF)   | 1.6 / 3.1 ms per frame       | 18.1 / 29.0 ms | 13 / 20           | 0.05 ms per entity  |
 | 1.21.11, 172 mods (Sodium, Iris, EntityCulling, EMF/ETF) | 1.5 / 1.7 ms per frame       | 1.7 / 2.7 ms   | capped (59 / 59)  | 0.03 ms per entity  |
 
-Ghosts are now cheaper than the real entities they replace.
+Holograms are now cheaper than the real entities they replace.
 
 Focused bench (`bench` in the trigger file): one wall of 140 item frames with random items,
 26.3 with 267 mods (Sodium, EntityCulling, ImmediatelyFast, EMF/ETF, MyTotemDoll). Frame time
@@ -138,14 +141,14 @@ is the render work per frame, without the frame limiter wait:
 |------------------------------------------------|------------|--------------------|
 | Mod paused (nothing drawn)                     | 2.2 ms     | -                  |
 | Real item frames (vanilla)                     | 7.9 ms     | 5.7 ms             |
-| Ghosts, items resolved again every frame (old) | 7.6 ms     | 5.4 ms             |
-| Ghosts, item states restored from a copy (now) | 4.4 ms     | 2.2 ms             |
+| Holograms, items resolved again every frame (old) | 7.6 ms     | 5.4 ms             |
+| Holograms, item states restored from a copy (now) | 4.4 ms     | 2.2 ms             |
 
-Item render states of reused ghost states are restored from a shallow copy taken at extraction
+Item render states of reused hologram states are restored from a shallow copy taken at extraction
 (fields added by other mods included) instead of being resolved again every frame, which keeps
 MyTotemDoll dolls stable at a fraction of the cost. Occlusion culling runs on its own
-thread (about 6-15 ms per pass for 2,484 ghosts, never blocking a frame) and roughly halves the
-number of ghosts drawn in that scene.
+thread (about 6-15 ms per pass for 2,484 holograms, never blocking a frame) and roughly halves the
+number of holograms drawn in that scene.
 
 ## License
 
